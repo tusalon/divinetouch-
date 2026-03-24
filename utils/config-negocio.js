@@ -1,12 +1,12 @@
 // utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
-// CLIENTE: Yayi Nails Salón y spa
+// CLIENTE: Divine touch
 
 console.log('🏢 config-negocio.js cargado');
 
 // ============================================
 // 🔥 CONFIGURACIÓN POR CLIENTE - ¡LO ÚNICO QUE CAMBIA!
 // ============================================
-const NEGOCIO_ID_POR_DEFECTO = '46ce6c3e-3c02-4232-a96c-6d0c5a92b12e'; // ID de Yayi Nails Salón y spa
+const NEGOCIO_ID_POR_DEFECTO = '720093d9-e7a0-43e3-9d5e-9c505966f0ac'; // ID de Divine touch
 
 // Hacer accesible globalmente
 window.NEGOCIO_ID_POR_DEFECTO = NEGOCIO_ID_POR_DEFECTO;
@@ -116,7 +116,7 @@ window.cargarConfiguracionNegocio = async function(forceRefresh = false) {
  */
 window.getNombreNegocio = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.nombre || 'Yayi Nails Salón y spa';
+    return config?.nombre || 'Divine touch';
 };
 
 /**
@@ -124,7 +124,7 @@ window.getNombreNegocio = async function() {
  */
 window.getTelefonoDuenno = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.telefono || '59262793 ';
+    return config?.telefono || '53865001';
 };
 
 /**
@@ -132,7 +132,7 @@ window.getTelefonoDuenno = async function() {
  */
 window.getEmailNegocio = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.email || 'yaimilsis@gmail.com';
+    return config?.email || 'garciabarbantamara@gmail.com';
 };
 
 /**
@@ -164,7 +164,7 @@ window.getHorarioAtencion = async function() {
  */
 window.getMensajeBienvenida = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.mensaje_bienvenida || '¡Bienvenida a Yayi Nails Salón y spa!';
+    return config?.mensaje_bienvenida || '¡Bienvenida a Divine touch!';
 };
 
 /**
@@ -180,7 +180,7 @@ window.getMensajeConfirmacion = async function() {
  */
 window.getNtfyTopic = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.ntfy_topic || 'yayi-nails-saln-y-spa';
+    return config?.ntfy_topic || 'divine-touch';
 };
 
 /**
@@ -205,5 +205,5 @@ setTimeout(async () => {
     await window.cargarConfiguracionNegocio();
 }, 500);
 
-console.log('✅ config-negocio.js listo para Yayi Nails Salón y spa');
+console.log('✅ config-negocio.js listo para Divine touch');
 console.log('🏷️  ID configurado:', NEGOCIO_ID_POR_DEFECTO);

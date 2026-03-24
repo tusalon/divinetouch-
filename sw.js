@@ -1,22 +1,22 @@
-// sw.js - Service Worker para Yayi Nails Salón y spa
+// sw.js - Service Worker para Divine touch
 
-const CACHE_NAME = 'yayi-nails-saln-y-spa-v1';
+const CACHE_NAME = 'divine-touch-v1';
 const urlsToCache = [
-  '/yayi-nails-saln-y-spa/',
-  '/yayi-nails-saln-y-spa/index.html',
-  '/yayi-nails-saln-y-spa/admin.html',
-  '/yayi-nails-saln-y-spa/admin-login.html',
-  '/yayi-nails-saln-y-spa/setup-wizard.html',
-  '/yayi-nails-saln-y-spa/editar-negocio.html',
-  '/yayi-nails-saln-y-spa/manifest.json',
-  '/yayi-nails-saln-y-spa/icons/icon-72x72.png',
-  '/yayi-nails-saln-y-spa/icons/icon-96x96.png',
-  '/yayi-nails-saln-y-spa/icons/icon-128x128.png',
-  '/yayi-nails-saln-y-spa/icons/icon-144x144.png',
-  '/yayi-nails-saln-y-spa/icons/icon-152x152.png',
-  '/yayi-nails-saln-y-spa/icons/icon-192x192.png',
-  '/yayi-nails-saln-y-spa/icons/icon-384x384.png',
-  '/yayi-nails-saln-y-spa/icons/icon-512x512.png'
+  '/divine-touch/',
+  '/divine-touch/index.html',
+  '/divine-touch/admin.html',
+  '/divine-touch/admin-login.html',
+  '/divine-touch/setup-wizard.html',
+  '/divine-touch/editar-negocio.html',
+  '/divine-touch/manifest.json',
+  '/divine-touch/icons/icon-72x72.png',
+  '/divine-touch/icons/icon-96x96.png',
+  '/divine-touch/icons/icon-128x128.png',
+  '/divine-touch/icons/icon-144x144.png',
+  '/divine-touch/icons/icon-152x152.png',
+  '/divine-touch/icons/icon-192x192.png',
+  '/divine-touch/icons/icon-384x384.png',
+  '/divine-touch/icons/icon-512x512.png'
 ];
 
 // ============================================
@@ -108,7 +108,7 @@ self.addEventListener('fetch', event => {
           }
           // Si no hay cache y es imagen, devolver icon por defecto
           if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/)) {
-            return caches.match('/yayi-nails-saln-y-spa/icons/icon-192x192.png');
+            return caches.match('/divine-touch/icons/icon-192x192.png');
           }
           return new Response('Error de red', { status: 408 });
         });
@@ -138,6 +138,6 @@ self.addEventListener('message', event => {
   }
 });
 
-console.log('✅ Service Worker configurado para Yayi Nails Salón y spa');
+console.log('✅ Service Worker configurado para Divine touch');
 console.log('📦 Cache:', CACHE_NAME);
 console.log('📄 Archivos a cachear:', urlsToCache.length);
