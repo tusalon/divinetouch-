@@ -1,20 +1,20 @@
 {
-  "name": "Yayi Nails Salón y spa",
-  "short_name": "Yayi",
+  "name": "Divine touch",
+  "short_name": "Divine",
   "description": "Uñas y belleza - Tu espacio de cuidado personal",
-  "start_url": "/yayi-nails-saln-y-spa/",
-  "scope": "/yayi-nails-saln-y-spa/",
+  "start_url": "/divine-touch/",
+  "scope": "/divine-touch/",
   "display": "standalone",
   "background_color": "#ec4899",
   "theme_color": "#ec4899",
   "icons": [
     {
-      "src": "/yayi-nails-saln-y-spa/icons/icon-192x192.png",
+      "src": "/divine-touch/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/yayi-nails-saln-y-spa/icons/icon-512x512.png",
+      "src": "/divine-touch/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
