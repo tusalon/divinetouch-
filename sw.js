@@ -1,22 +1,22 @@
-// sw.js - Service Worker para Divine touch
+// sw.js - Service Worker para Divine Touch
 
 const CACHE_NAME = 'divine-touch-v1';
 const urlsToCache = [
-  '/divine-touch/',
-  '/divine-touch/index.html',
-  '/divine-touch/admin.html',
-  '/divine-touch/admin-login.html',
-  '/divine-touch/setup-wizard.html',
-  '/divine-touch/editar-negocio.html',
-  '/divine-touch/manifest.json',
-  '/divine-touch/icons/icon-72x72.png',
-  '/divine-touch/icons/icon-96x96.png',
-  '/divine-touch/icons/icon-128x128.png',
-  '/divine-touch/icons/icon-144x144.png',
-  '/divine-touch/icons/icon-152x152.png',
-  '/divine-touch/icons/icon-192x192.png',
-  '/divine-touch/icons/icon-384x384.png',
-  '/divine-touch/icons/icon-512x512.png'
+  '/divinetouch-/',
+  '/divinetouch-/index.html',
+  '/divinetouch-/admin.html',
+  '/divinetouch-/admin-login.html',
+  '/divinetouch-/setup-wizard.html',
+  '/divinetouch-/editar-negocio.html',
+  '/divinetouch-/manifest.json',
+  '/divinetouch-/icons/icon-72x72.png',
+  '/divinetouch-/icons/icon-96x96.png',
+  '/divinetouch-/icons/icon-128x128.png',
+  '/divinetouch-/icons/icon-144x144.png',
+  '/divinetouch-/icons/icon-152x152.png',
+  '/divinetouch-/icons/icon-192x192.png',
+  '/divinetouch-/icons/icon-384x384.png',
+  '/divinetouch-/icons/icon-512x512.png'
 ];
 
 // ============================================
@@ -108,7 +108,7 @@ self.addEventListener('fetch', event => {
           }
           // Si no hay cache y es imagen, devolver icon por defecto
           if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/)) {
-            return caches.match('/divine-touch/icons/icon-192x192.png');
+            return caches.match('/divinetouch-/icons/icon-192x192.png');
           }
           return new Response('Error de red', { status: 408 });
         });
@@ -138,6 +138,6 @@ self.addEventListener('message', event => {
   }
 });
 
-console.log('✅ Service Worker configurado para Divine touch');
+console.log('✅ Service Worker configurado para Divine Touch');
 console.log('📦 Cache:', CACHE_NAME);
 console.log('📄 Archivos a cachear:', urlsToCache.length);
