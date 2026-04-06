@@ -1,4 +1,4 @@
-// utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
+﻿// utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
 // CLIENTE: Divine touch
 
 console.log('🏢 config-negocio.js cargado');

@@ -1,4 +1,4 @@
-// components/admin/HorariosPorDiaPanel.js - Panel para configurar horarios por día
+﻿// components/admin/HorariosPorDiaPanel.js - Panel para configurar horarios por día
 
 function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCancelar }) {
     const [horariosPorDia, setHorariosPorDia] = React.useState({});
@@ -143,7 +143,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
     if (cargando) {
         return (
             <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
                 <p className="text-gray-500 mt-2">Cargando horarios...</p>
             </div>
         );
@@ -168,7 +168,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                                 className={`
                                     w-full text-left px-4 py-3 rounded-lg transition-all
                                     ${diaSeleccionado === dia.id 
-                                        ? 'bg-amber-600 text-white shadow-md' 
+                                        ? 'bg-purple-700 text-white shadow-md' 
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
                                 `}
                             >
@@ -178,7 +178,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                                         <span className={`
                                             text-xs px-2 py-1 rounded-full
                                             ${diaSeleccionado === dia.id 
-                                                ? 'bg-amber-500 text-white' 
+                                                ? 'bg-purple-600 text-white' 
                                                 : 'bg-gray-300 text-gray-700'}
                                         `}>
                                             {cantidadHoras} hs
@@ -196,7 +196,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                         <h4 className="font-medium text-gray-700">
                             Horas para {dias.find(d => d.id === diaSeleccionado)?.nombre}
                             {horasDisponibles.length > 0 && (
-                                <span className="ml-2 text-sm text-amber-600">
+                                <span className="ml-2 text-sm text-purple-700">
                                     ({horasDisponibles.length} horarios)
                                 </span>
                             )}
@@ -249,8 +249,8 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                                     className={`
                                         px-2 py-1 text-xs font-medium rounded transition-all
                                         ${activa 
-                                            ? 'bg-amber-600 text-white shadow-md hover:bg-amber-700' 
-                                            : 'bg-white border border-gray-300 text-gray-700 hover:border-amber-400 hover:bg-amber-50'}
+                                            ? 'bg-purple-700 text-white shadow-md hover:bg-amber-700' 
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:border-purple-400 hover:bg-purple-50'}
                                     `}
                                 >
                                     {hora.legible}
@@ -274,7 +274,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                         return (
                             <div key={dia.id} className="text-center p-2 bg-gray-50 rounded-lg">
                                 <div className="text-xs text-gray-500">{dia.nombre.substring(0, 3)}</div>
-                                <div className={`font-bold ${cantidad > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
+                                <div className={`font-bold ${cantidad > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
                                     {cantidad} hs
                                 </div>
                             </div>
@@ -293,7 +293,7 @@ function HorariosPorDiaPanel({ profesionalId, profesionalNombre, onGuardar, onCa
                 </button>
                 <button
                     onClick={handleGuardar}
-                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                    className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-amber-700"
                 >
                     Guardar Horarios
                 </button>

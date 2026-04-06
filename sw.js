@@ -1,4 +1,4 @@
-// sw.js - Service Worker para Divine Touch
+﻿// sw.js - Service Worker para Divine Touch
 
 const CACHE_NAME = 'divine-touch-v1';
 const urlsToCache = [

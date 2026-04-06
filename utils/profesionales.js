@@ -1,4 +1,4 @@
-// utils/profesionales.js - Gestión de profesionales (CORREGIDO)
+﻿// utils/profesionales.js - Gestión de profesionales (CORREGIDO)
 
 console.log('👥 profesionales.js cargado');
 
@@ -104,7 +104,7 @@ window.salonProfesionales = {
                         negocio_id: negocioId,
                         nombre: profesional.nombre,
                         especialidad: profesional.especialidad,
-                        color: profesional.color || 'bg-amber-600',
+                        color: profesional.color || 'bg-purple-700',
                         avatar: profesional.avatar || '👤',
                         activo: true,
                         telefono: profesional.telefono || null,

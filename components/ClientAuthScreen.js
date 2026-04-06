@@ -1,4 +1,4 @@
-// components/ClientAuthScreen.js - VERSIÓN REGISTRO AUTOMÁTICO
+﻿// components/ClientAuthScreen.js - VERSIÓN REGISTRO AUTOMÁTICO
 
 function ClientAuthScreen({ onAccessGranted, onGoBack }) {
     const [config, setConfig] = React.useState(null);
@@ -218,14 +218,14 @@ const handleSubmit = async (e) => {
 
     if (cargando || !imagenCargada) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
         );
     }
 
-    const colorPrimario = config?.color_primario || '#ec4899';
-    const colorSecundario = config?.color_secundario || '#f9a8d4';
+    const colorPrimario = config?.color_primario || '#7c3aed';
+    const colorSecundario = config?.color_secundario || '#c084fc';
     const nombreNegocio = config?.nombre || 'Mi Salón';
     const telefonoDuenno = config?.telefono || '55002272';
     const logoUrl = config?.logo_url;
@@ -249,7 +249,7 @@ const handleSubmit = async (e) => {
             {onGoBack && (
                 <button
                     onClick={onGoBack}
-                    className="absolute top-4 left-4 z-20 w-10 h-10 bg-pink-500/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors border border-pink-300"
+                    className="absolute top-4 left-4 z-20 w-10 h-10 bg-purple-600/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors border border-purple-300"
                     title="Volver"
                 >
                     <i className="icon-arrow-left text-white text-xl"></i>
@@ -257,25 +257,25 @@ const handleSubmit = async (e) => {
             )}
 
             <div className="relative z-10 max-w-md w-full mx-auto">
-                <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-pink-300/50">
+                <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-purple-300/50">
                     {/* Logo o sticker */}
                     <div className="text-center mb-6">
                         {logoUrl ? (
                             <img 
                                 src={logoUrl} 
                                 alt={nombreNegocio} 
-                                className="w-20 h-20 object-contain mx-auto rounded-xl ring-4 ring-pink-300/50"
+                                className="w-20 h-20 object-contain mx-auto rounded-xl ring-4 ring-purple-300/50"
                             />
                         ) : (
-                            <div className="w-20 h-20 rounded-xl mx-auto flex items-center justify-center bg-pink-500 ring-4 ring-pink-300/50">
+                            <div className="w-20 h-20 rounded-xl mx-auto flex items-center justify-center bg-purple-600 ring-4 ring-purple-300/50">
                                 <span className="text-3xl">{sticker}</span>
                             </div>
                         )}
                         <h1 className="text-3xl font-bold text-white mt-4">{nombreNegocio}</h1>
-                        <p className="text-pink-300 mt-1">🌸 Espacio de belleza y cuidado 🌸</p>
+                        <p className="text-purple-300 mt-1">🌸 Espacio de belleza y cuidado 🌸</p>
                     </div>
 
-                    <h2 className="text-lg font-semibold text-white mb-4 flex items-center justify-center gap-2 bg-pink-500/30 p-3 rounded-lg">
+                    <h2 className="text-lg font-semibold text-white mb-4 flex items-center justify-center gap-2 bg-purple-600/30 p-3 rounded-lg">
                         <span>💖</span>
                         Ingresá con tu número
                         <span>💖</span>
@@ -291,7 +291,7 @@ const handleSubmit = async (e) => {
                                 type="text"
                                 value={nombre}
                                 onChange={(e) => setNombre(e.target.value)}
-                                className={`w-full px-4 py-3 rounded-lg border border-pink-300/30 bg-white/10 text-white placeholder-pink-200/70 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition ${
+                                className={`w-full px-4 py-3 rounded-lg border border-purple-300/30 bg-white/10 text-white placeholder-purple-200/70 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition ${
                                     esAdmin || esProfesional ? 'opacity-60 cursor-not-allowed' : ''
                                 }`}
                                 placeholder="Ej: María Pérez"
@@ -305,7 +305,7 @@ const handleSubmit = async (e) => {
                                 Tu WhatsApp
                             </label>
                             <div className="flex">
-                                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-pink-300/30 bg-white/10 text-pink-300 text-sm">
+                                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-purple-300/30 bg-white/10 text-purple-300 text-sm">
                                     +53
                                 </span>
                                 <input
@@ -316,36 +316,36 @@ const handleSubmit = async (e) => {
                                         setWhatsapp(value);
                                         verificarNumero(value);
                                     }}
-                                    className="w-full px-4 py-3 rounded-r-lg border border-pink-300/30 bg-white/10 text-white placeholder-pink-200/70 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition"
+                                    className="w-full px-4 py-3 rounded-r-lg border border-purple-300/30 bg-white/10 text-white placeholder-purple-200/70 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition"
                                     placeholder="51234567"
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-pink-300/70 mt-1">
+                            <p className="text-xs text-purple-300/70 mt-1">
                                 Ingresá tu número de WhatsApp (8 dígitos después del +53)
                             </p>
                         </div>
 
                         {/* Indicador de verificación */}
                         {verificando && (
-                            <div className="text-pink-300 text-sm bg-pink-500/20 p-2 rounded-lg flex items-center gap-2 border border-pink-300/30">
-                                <div className="animate-spin h-4 w-4 border-2 border-pink-300 border-t-transparent rounded-full"></div>
+                            <div className="text-purple-300 text-sm bg-purple-600/20 p-2 rounded-lg flex items-center gap-2 border border-purple-300/30">
+                                <div className="animate-spin h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full"></div>
                                 Verificando...
                             </div>
                         )}
 
                         {/* Mensajes según el rol detectado */}
                         {esAdmin && !verificando && (
-                            <div className="bg-pink-500/30 border border-pink-300/50 rounded-lg p-4">
+                            <div className="bg-purple-600/30 border border-purple-300/50 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
                                         A
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-white font-bold text-xl">
                                             ¡Bienvenida Administradora!
                                         </p>
-                                        <p className="text-pink-200 text-sm">
+                                        <p className="text-purple-200 text-sm">
                                             Hacé clic en el botón de abajo para acceder al panel.
                                         </p>
                                     </div>
@@ -354,16 +354,16 @@ const handleSubmit = async (e) => {
                         )}
 
                         {esProfesional && profesionalInfo && !verificando && (
-                            <div className="bg-pink-500/30 border border-pink-300/50 rounded-lg p-4">
+                            <div className="bg-purple-600/30 border border-purple-300/50 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
                                         P
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-white font-bold text-xl">
                                             ¡Hola {profesionalInfo.nombre}!
                                         </p>
-                                        <p className="text-pink-200 text-sm">
+                                        <p className="text-purple-200 text-sm">
                                             Hacé clic en el botón de abajo para acceder a tu panel.
                                         </p>
                                     </div>
@@ -408,7 +408,7 @@ const handleSubmit = async (e) => {
                                         localStorage.setItem('adminLoginTime', Date.now());
                                         window.location.href = 'admin.html';
                                     }}
-                                    className="w-full bg-white text-pink-600 py-4 rounded-xl font-bold hover:bg-pink-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-pink-300"
+                                    className="w-full bg-white text-purple-700 py-4 rounded-xl font-bold hover:bg-purple-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-purple-300"
                                 >
                                     <span className="text-xl">⚡</span>
                                     Ingresar como Administradora
@@ -427,7 +427,7 @@ const handleSubmit = async (e) => {
                                         }));
                                         window.location.href = 'admin.html';
                                     }}
-                                    className="w-full bg-white text-pink-600 py-4 rounded-xl font-bold hover:bg-pink-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-pink-300"
+                                    className="w-full bg-white text-purple-700 py-4 rounded-xl font-bold hover:bg-purple-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-purple-300"
                                 >
                                     <span className="text-xl">✂️</span>
                                     Ingresar como Profesional
@@ -438,7 +438,7 @@ const handleSubmit = async (e) => {
                                 <button
                                     type="button"
                                     onClick={handleAccesoDirecto}
-                                    className="w-full bg-white text-pink-600 py-4 rounded-xl font-bold hover:bg-pink-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-pink-300"
+                                    className="w-full bg-white text-purple-700 py-4 rounded-xl font-bold hover:bg-purple-50 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-purple-300"
                                 >
                                     <span className="text-xl">📱</span>
                                     Ingresar como Cliente
@@ -449,7 +449,7 @@ const handleSubmit = async (e) => {
                                 <button
                                     type="submit"
                                     disabled={verificando}
-                                    className="w-full bg-pink-500 text-white py-4 rounded-xl font-bold hover:bg-pink-600 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-pink-300"
+                                    className="w-full bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg text-lg border-2 border-purple-300"
                                 >
                                     <span className="text-xl">💅</span>
                                     {verificando ? 'Verificando...' : 'Registrarme y Reservar'}

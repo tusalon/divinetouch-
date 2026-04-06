@@ -1,4 +1,4 @@
-// components/admin/ProfesionalesPanel.js
+﻿// components/admin/ProfesionalesPanel.js
 
 function ProfesionalesPanel() {
     const [profesionales, setProfesionales] = React.useState([]);
@@ -78,7 +78,7 @@ function ProfesionalesPanel() {
         return (
             <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
                     <p className="text-gray-500 mt-4">Cargando profesionales...</p>
                 </div>
             </div>
@@ -94,7 +94,7 @@ function ProfesionalesPanel() {
                         setEditando(null);
                         setMostrarForm(true);
                     }}
-                    className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
+                    className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
                 >
                     + Nuevo Profesional
                 </button>
@@ -121,7 +121,7 @@ function ProfesionalesPanel() {
                         <div key={p.id} className={`border rounded-lg p-4 ${p.activo ? '' : 'opacity-50 bg-gray-50'}`}>
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-12 h-12 ${p.color || 'bg-amber-600'} rounded-full flex items-center justify-center text-2xl`}>
+                                    <div className={`w-12 h-12 ${p.color || 'bg-purple-700'} rounded-full flex items-center justify-center text-2xl`}>
                                         {p.avatar || '👤'}
                                     </div>
                                     <div>
@@ -190,15 +190,15 @@ function ProfesionalForm({ profesional, onGuardar, onCancelar }) {
         telefono: '',
         password: '',
         nivel: 1,
-        color: 'bg-amber-600',
+        color: 'bg-purple-700',
         avatar: '👤'
     });
 
     const avatares = ['👤', '💇', '💅', '👑', '⭐', '🔰'];
     const colores = [
-        { value: 'bg-amber-600', label: 'Ámbar' },
+        { value: 'bg-purple-700', label: 'Ámbar' },
         { value: 'bg-amber-700', label: 'Ámbar Oscuro' },
-        { value: 'bg-pink-500', label: 'Rosa' },
+        { value: 'bg-purple-600', label: 'Rosa' },
         { value: 'bg-purple-500', label: 'Púrpura' },
         { value: 'bg-blue-500', label: 'Azul' },
         { value: 'bg-green-500', label: 'Verde' }
@@ -324,7 +324,7 @@ function ProfesionalForm({ profesional, onGuardar, onCancelar }) {
             
             <div className="flex justify-end gap-2 mt-4">
                 <button type="button" onClick={onCancelar} className="px-4 py-2 border rounded-lg hover:bg-gray-100">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">Guardar</button>
+                <button type="submit" className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-amber-700">Guardar</button>
             </div>
         </form>
     );

@@ -1,4 +1,4 @@
-// utils/whatsapp-helper.js - VERSIÓN GENÉRICA COMPLETA
+﻿// utils/whatsapp-helper.js - VERSIÓN GENÉRICA COMPLETA
 // CON FORMATO EXACTO DE MENSAJE
 // + Función unificada para confirmación de reserva
 // + Servicio incluido en notificaciones push

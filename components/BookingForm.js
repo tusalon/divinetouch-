@@ -1,4 +1,4 @@
-// components/BookingForm.js - VERSIÓN GENÉRICA
+﻿// components/BookingForm.js - VERSIÓN GENÉRICA
 // CON LÓGICA COMPLETA DE NOTIFICACIONES (PUSH SIEMPRE)
 // CORREGIDO: Hora local para archivos ICS
 // MODIFICADO: Solo notifica a la dueña, NO al cliente
@@ -283,19 +283,19 @@ END:VCALENDAR`;
     // ============================================
     return (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-white/95 backdrop-blur-md w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-xl space-y-6 border-2 border-pink-300">
-                <div className="flex justify-between items-center border-b border-pink-200 pb-4">
+            <div className="bg-white/95 backdrop-blur-md w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-xl space-y-6 border-2 border-purple-300">
+                <div className="flex justify-between items-center border-b border-purple-200 pb-4">
                     <h3 className="text-xl font-bold text-pink-800 flex items-center gap-2">
                         <span>💖</span>
                         Confirmar Reserva
                     </h3>
-                    <button onClick={onCancel} className="text-pink-400 hover:text-pink-600">
+                    <button onClick={onCancel} className="text-purple-400 hover:text-purple-700">
                         <i className="icon-x text-2xl"></i>
                     </button>
                 </div>
 
                 <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-xl border border-pink-200 space-y-2">
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200 space-y-2">
                         <div className="flex items-center gap-3 text-pink-700">
                             <span className="text-2xl">
                                 {service.nombre.toLowerCase().includes('corte') ? '✂️' : 
@@ -322,15 +322,15 @@ END:VCALENDAR`;
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="bg-pink-50 p-3 rounded-lg border border-pink-200">
+                        <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
                             <p className="text-sm text-pink-700">
                                 <span className="font-semibold">Tus datos:</span> {cliente.nombre} - +{cliente.whatsapp}
                             </p>
                         </div>
 
                         {error && (
-                            <div className="text-pink-600 text-sm bg-pink-100 p-3 rounded-lg flex items-start gap-2 border border-pink-300">
-                                <span className="text-pink-500">⚠️</span>
+                            <div className="text-purple-700 text-sm bg-purple-100 p-3 rounded-lg flex items-start gap-2 border border-purple-300">
+                                <span className="text-purple-600">⚠️</span>
                                 {error}
                             </div>
                         )}
@@ -338,7 +338,7 @@ END:VCALENDAR`;
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white py-3.5 rounded-xl font-bold hover:from-pink-600 hover:to-pink-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg"
+                            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3.5 rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg"
                         >
                             {submitting ? (
                                 <>

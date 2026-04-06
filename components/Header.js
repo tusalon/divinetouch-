@@ -1,4 +1,4 @@
-// components/Header.js
+﻿// components/Header.js
 
 function Header({ cliente, onLogout, onMisReservas, onGoBack, userRol, showBackButton }) {
     const [mostrarOpcionesAdmin, setMostrarOpcionesAdmin] = React.useState(false);
@@ -35,7 +35,7 @@ function Header({ cliente, onLogout, onMisReservas, onGoBack, userRol, showBackB
                         </button>
                     )}
                     
-                    <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center text-white">
+                    <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center text-white">
                         <i className="icon-calendar text-lg"></i>
                     </div>
                     <h1 className="text-xl font-bold text-gray-800">{nombreNegocio}</h1>
@@ -52,7 +52,7 @@ function Header({ cliente, onLogout, onMisReservas, onGoBack, userRol, showBackB
                     {cliente && onMisReservas && userRol === 'cliente' && (
                         <button
                             onClick={onMisReservas}
-                            className="flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-2 rounded-full transition-all"
+                            className="flex items-center gap-2 bg-purple-100 hover:bg-amber-200 text-amber-700 px-3 py-2 rounded-full transition-all"
                             title="Mis Reservas"
                         >
                             <i className="icon-calendar"></i>
@@ -64,7 +64,7 @@ function Header({ cliente, onLogout, onMisReservas, onGoBack, userRol, showBackB
                         <div className="relative">
                             <button
                                 onClick={goToAdmin}
-                                className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-3 py-2 rounded-full transition-all transform hover:scale-105 shadow-md border border-amber-400"
+                                className="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-3 py-2 rounded-full transition-all transform hover:scale-105 shadow-md border border-purple-400"
                                 title={userRol === 'admin' ? 'Panel de Administración' : 'Mi Panel de Trabajo'}
                                 onMouseEnter={() => setMostrarOpcionesAdmin(true)}
                                 onMouseLeave={() => setMostrarOpcionesAdmin(false)}
@@ -80,12 +80,12 @@ function Header({ cliente, onLogout, onMisReservas, onGoBack, userRol, showBackB
                                 <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-amber-700 p-2 text-xs text-gray-300 z-50">
                                     {userRol === 'admin' ? (
                                         <div className="space-y-1">
-                                            <p className="font-semibold text-amber-400">👑 Acceso como administrador</p>
+                                            <p className="font-semibold text-purple-400">👑 Acceso como administrador</p>
                                             <p className="text-gray-400">Puede gestionar todo el sistema</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-1">
-                                            <p className="font-semibold text-amber-400">✂️ Acceso como profesional</p>
+                                            <p className="font-semibold text-purple-400">✂️ Acceso como profesional</p>
                                             <p className="text-gray-400">Bienvenido, {cliente?.nombre}</p>
                                             <p className="text-gray-500 text-xs">Puede ver tus reservas</p>
                                         </div>

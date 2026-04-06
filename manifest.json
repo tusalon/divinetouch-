@@ -1,12 +1,12 @@
-{
+﻿{
   "name": "Divine Touch",
   "short_name": "Divine",
   "description": "Uñas y belleza - Tu espacio de cuidado personal",
   "start_url": "/divinetouch-/",
   "scope": "/divinetouch-/",
   "display": "standalone",
-  "background_color": "#6b21a5",
-  "theme_color": "#6b21a5",
+  "background_color": "#7c3aed",
+  "theme_color": "#7c3aed",
   "icons": [
     {
       "src": "/divinetouch-/icons/icon-192x192.png",
