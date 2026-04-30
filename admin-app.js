@@ -349,6 +349,22 @@ function AdminApp() {
     const [currentDate, setCurrentDate] = React.useState(new Date());
     const [diasLaborales, setDiasLaborales] = React.useState([]);
     const [fechasConHorarios, setFechasConHorarios] = React.useState({});
+    const serviciosAgrupadosPorCategoria = React.useMemo(() => {
+        const grupos = {};
+        serviciosList.forEach(servicio => {
+            const categoria = ((servicio.categoria || '').toString().trim()) || 'General';
+            if (!grupos[categoria]) grupos[categoria] = [];
+            grupos[categoria].push(servicio);
+        });
+        return Object.keys(grupos).sort((a, b) => {
+            if (a === 'General') return -1;
+            if (b === 'General') return 1;
+            return a.localeCompare(b);
+        }).map(categoria => ({
+            categoria,
+            servicios: grupos[categoria]
+        }));
+    }, [serviciosList]);
 
     // ============================================
     // FUNCIÓN PARA CARGAR DÍAS CERRADOS DIRECTAMENTE DE SUPABASE
@@ -1386,7 +1402,13 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Servicio *</label>
                                     <select value={nuevaReservaData.servicio} onChange={(e) => setNuevaReservaData({...nuevaReservaData, servicio: e.target.value})} className="w-full border rounded-lg px-3 py-2">
                                         <option value="">Seleccionar servicio</option>
-                                        {serviciosList.map(s => (<option key={s.id} value={s.nombre}>{s.nombre} ({s.duracion} min - ${s.precio})</option>))}
+                                        {serviciosAgrupadosPorCategoria.map(grupo => (
+                                            <optgroup key={grupo.categoria} label={grupo.categoria}>
+                                                {grupo.servicios.map(s => (
+                                                    <option key={s.id} value={s.nombre}>{s.nombre} ({s.duracion} min - ${s.precio})</option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>

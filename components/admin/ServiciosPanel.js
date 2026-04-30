@@ -6,6 +6,10 @@ function ServiciosPanel() {
     const [editando, setEditando] = React.useState(null);
     const [cargando, setCargando] = React.useState(true);
     const [servicioParaAsignar, setServicioParaAsignar] = React.useState(null);
+    const categorias = React.useMemo(() => {
+        const nombres = servicios.map(s => normalizarCategoriaServicio(s.categoria));
+        return Array.from(new Set(nombres)).sort((a, b) => a.localeCompare(b));
+    }, [servicios]);
 
     React.useEffect(() => {
         cargarServicios();
@@ -102,6 +106,7 @@ function ServiciosPanel() {
             {mostrarForm && (
                 <ServicioForm
                     servicio={editando}
+                    categorias={categorias}
                     onGuardar={handleGuardar}
                     onCancelar={() => {
                         setMostrarForm(false);
@@ -123,6 +128,9 @@ function ServiciosPanel() {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3">
                                         <h3 className="font-semibold text-lg">{s.nombre}</h3>
+                                        <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700">
+                                            {normalizarCategoriaServicio(s.categoria)}
+                                        </span>
                                         <button
                                             onClick={() => toggleActivo(s.id)}
                                             className={`text-xs px-2 py-1 rounded-full ${
@@ -189,14 +197,22 @@ function ServiciosPanel() {
     );
 }
 
+function normalizarCategoriaServicio(valor) {
+    const categoria = (valor || '').toString().trim();
+    return categoria || 'General';
+}
+
 // COMPONENTE DE FORMULARIO DE SERVICIO
-function ServicioForm({ servicio, onGuardar, onCancelar }) {
-    const [form, setForm] = React.useState(servicio || {
+function ServicioForm({ servicio, categorias = [], onGuardar, onCancelar }) {
+    const [form, setForm] = React.useState({
         nombre: '',
         duracion: '45',
         precio: '0',
+        categoria: 'General',
         descripcion: '',
-        horarios_permitidos: []
+        horarios_permitidos: [],
+        ...(servicio || {}),
+        categoria: normalizarCategoriaServicio(servicio?.categoria)
     });
 
     const [horariosStr, setHorariosStr] = React.useState(
@@ -210,6 +226,8 @@ function ServicioForm({ servicio, onGuardar, onCancelar }) {
             alert('El nombre del servicio es obligatorio');
             return;
         }
+
+        const categoria = normalizarCategoriaServicio(form.categoria);
 
         const duracionNum = parseInt(form.duracion);
         if (isNaN(duracionNum) || duracionNum < 15) {
@@ -234,6 +252,7 @@ function ServicioForm({ servicio, onGuardar, onCancelar }) {
         
         onGuardar({
             ...form,
+            categoria,
             duracion: duracionNum,
             precio: precioNum,
             horarios_permitidos: horariosArray
@@ -259,6 +278,30 @@ function ServicioForm({ servicio, onGuardar, onCancelar }) {
                         placeholder="Ej: Corte de Cabello"
                         required
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Pestaña / categoría *
+                    </label>
+                    <input
+                        type="text"
+                        value={form.categoria || ''}
+                        onChange={(e) => setForm({...form, categoria: e.target.value})}
+                        onBlur={() => setForm(prev => ({...prev, categoria: normalizarCategoriaServicio(prev.categoria)}))}
+                        className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-600 focus:border-purple-600"
+                        placeholder="Ej: Manicura, Pedicura, Masajes"
+                        list="categorias-servicios"
+                        required
+                    />
+                    <datalist id="categorias-servicios">
+                        {categorias.map(categoria => (
+                            <option key={categoria} value={categoria} />
+                        ))}
+                    </datalist>
+                    <p className="text-xs text-gray-400 mt-1">
+                        Escribí una pestaña nueva o elegí una existente. Los clientes verán los servicios agrupados por esta pestaña.
+                    </p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">

@@ -16,6 +16,59 @@ function getNegocioId() {
 let serviciosCache = [];
 let ultimaActualizacionServicios = 0;
 const CACHE_DURATION_SERVICIOS = 5 * 60 * 1000;
+const CATEGORIA_SERVICIO_DEFAULT = 'General';
+
+function normalizarCategoriaServicio(valor) {
+    const categoria = (valor || '').toString().trim();
+    return categoria || CATEGORIA_SERVICIO_DEFAULT;
+}
+
+function prepararServicioParaUI(servicio) {
+    return {
+        ...servicio,
+        categoria: normalizarCategoriaServicio(servicio.categoria || servicio.pestana || servicio.tipo)
+    };
+}
+
+async function enviarServicioConCompatibilidad(url, method, datos) {
+    const enviar = async (payload) => {
+        return fetch(url, {
+            method: method,
+            headers: {
+                'apikey': window.SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(payload)
+        });
+    };
+
+    let response = await enviar(datos);
+    
+    if (!response.ok && datos.categoria !== undefined) {
+        const error = await response.text();
+        const errorLower = error.toLowerCase();
+        const pareceColumnaCategoriaFaltante = errorLower.includes('categoria') && (
+            errorLower.includes('column') ||
+            errorLower.includes('schema cache') ||
+            errorLower.includes('could not find')
+        );
+        
+        if (pareceColumnaCategoriaFaltante) {
+            console.warn('⚠️ La tabla servicios no tiene columna categoria. Reintentando sin categoria para no romper el guardado.');
+            const datosSinCategoria = { ...datos };
+            delete datosSinCategoria.categoria;
+            response = await enviar(datosSinCategoria);
+            response.categoriaNoPersistida = true;
+            response.errorCategoria = error;
+        } else {
+            response.errorOriginal = error;
+        }
+    }
+    
+    return response;
+}
 
 async function cargarServiciosDesdeDB() {
     try {
@@ -38,7 +91,7 @@ async function cargarServiciosDesdeDB() {
             return null;
         }
         
-        const data = await response.json();
+        const data = (await response.json()).map(prepararServicioParaUI);
         console.log('✅ Servicios cargados desde Supabase:', data);
         serviciosCache = data;
         ultimaActualizacionServicios = Date.now();
@@ -84,7 +137,7 @@ window.salonServicios = {
             );
             if (!response.ok) return null;
             const data = await response.json();
-            return data[0] || null;
+            return data[0] ? prepararServicioParaUI(data[0]) : null;
         } catch (error) {
             console.error('Error obteniendo servicio:', error);
             return null;
@@ -96,37 +149,33 @@ window.salonServicios = {
             const negocioId = getNegocioId();
             console.log('➕ Creando servicio para negocio:', negocioId);
             
-            const response = await fetch(
+            const response = await enviarServicioConCompatibilidad(
                 `${window.SUPABASE_URL}/rest/v1/servicios`,
+                'POST',
                 {
-                    method: 'POST',
-                    headers: {
-                        'apikey': window.SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify({
-                        negocio_id: negocioId,
-                        nombre: servicio.nombre,
-                        duracion: servicio.duracion,
-                        precio: servicio.precio,
-                        descripcion: servicio.descripcion || '',
-                        activo: true,
-                        imagen: servicio.imagen || null,
-                        horarios_permitidos: servicio.horarios_permitidos || []
-                    })
+                    negocio_id: negocioId,
+                    nombre: servicio.nombre,
+                    duracion: servicio.duracion,
+                    precio: servicio.precio,
+                    descripcion: servicio.descripcion || '',
+                    activo: true,
+                    imagen: servicio.imagen || null,
+                    horarios_permitidos: servicio.horarios_permitidos || [],
+                    categoria: normalizarCategoriaServicio(servicio.categoria)
                 }
             );
             
             if (!response.ok) {
-                const error = await response.text();
+                const error = response.errorOriginal || await response.text();
                 console.error('Error al crear servicio:', error);
                 return null;
             }
             
             const nuevo = await response.json();
             console.log('✅ Servicio creado:', nuevo);
+            if (response.categoriaNoPersistida) {
+                alert('⚠️ Servicio guardado, pero la pestaña no se pudo guardar porque falta la columna "categoria" en la tabla servicios.');
+            }
             
             serviciosCache = await cargarServiciosDesdeDB() || serviciosCache;
             
@@ -134,7 +183,7 @@ window.salonServicios = {
                 window.dispatchEvent(new Event('serviciosActualizados'));
             }
             
-            return nuevo[0];
+            return nuevo[0] ? prepararServicioParaUI(nuevo[0]) : null;
         } catch (error) {
             console.error('Error en crear:', error);
             return null;
@@ -154,29 +203,25 @@ window.salonServicios = {
             if (cambios.activo !== undefined) datosActualizar.activo = cambios.activo;
             if (cambios.imagen !== undefined) datosActualizar.imagen = cambios.imagen;
             if (cambios.horarios_permitidos !== undefined) datosActualizar.horarios_permitidos = cambios.horarios_permitidos;
+            if (cambios.categoria !== undefined) datosActualizar.categoria = normalizarCategoriaServicio(cambios.categoria);
             
-            const response = await fetch(
+            const response = await enviarServicioConCompatibilidad(
                 `${window.SUPABASE_URL}/rest/v1/servicios?negocio_id=eq.${negocioId}&id=eq.${id}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': window.SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify(datosActualizar)
-                }
+                'PATCH',
+                datosActualizar
             );
             
             if (!response.ok) {
-                const error = await response.text();
+                const error = response.errorOriginal || await response.text();
                 console.error('Error al actualizar servicio:', error);
                 return null;
             }
             
             const actualizado = await response.json();
             console.log('✅ Servicio actualizado:', actualizado);
+            if (response.categoriaNoPersistida) {
+                alert('⚠️ Servicio actualizado, pero la pestaña no se pudo guardar porque falta la columna "categoria" en la tabla servicios.');
+            }
             
             serviciosCache = await cargarServiciosDesdeDB() || serviciosCache;
             
@@ -184,7 +229,7 @@ window.salonServicios = {
                 window.dispatchEvent(new Event('serviciosActualizados'));
             }
             
-            return actualizado[0];
+            return actualizado[0] ? prepararServicioParaUI(actualizado[0]) : null;
         } catch (error) {
             console.error('Error en actualizar:', error);
             return null;
