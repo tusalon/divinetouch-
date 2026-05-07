@@ -885,9 +885,24 @@ function AdminApp() {
             const configNegocio = await window.cargarConfiguracionNegocio();
             const requiereAnticipo = nuevaReservaData.requiereAnticipo;
             
+            const clienteWhatsapp = `53${nuevaReservaData.cliente_whatsapp.replace(/\D/g, '')}`;
+            
+            if (typeof window.crearCliente === 'function') {
+                const clienteRegistrado = await window.crearCliente(
+                    nuevaReservaData.cliente_nombre,
+                    clienteWhatsapp
+                );
+                
+                if (!clienteRegistrado) {
+                    console.warn('⚠️ No se pudo registrar el cliente, se continuará creando la reserva manual');
+                }
+            } else {
+                console.warn('⚠️ crearCliente no está disponible, se continuará creando la reserva manual');
+            }
+            
             const bookingData = {
                 cliente_nombre: nuevaReservaData.cliente_nombre,
-                cliente_whatsapp: `53${nuevaReservaData.cliente_whatsapp.replace(/\D/g, '')}`,
+                cliente_whatsapp: clienteWhatsapp,
                 servicio: nuevaReservaData.servicio,
                 duracion: servicio.duracion,
                 profesional_id: nuevaReservaData.profesional_id,
