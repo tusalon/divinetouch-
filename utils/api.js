@@ -1,4 +1,4 @@
-﻿// utils/api.js - Versión genérica para profesionales (CORREGIDO)
+// utils/api.js - Versión genérica para profesionales (CORREGIDO)
 
 console.log('📡 api.js cargado');
 
@@ -86,6 +86,12 @@ async function getBookingsByDateAndProfesional(dateStr, profesionalId) {
 async function createBooking(bookingData) {
     try {
         const negocioId = getNegocioId();
+        const bloqueo = await window.getClienteBloqueado?.(bookingData.cliente_whatsapp);
+        if (bloqueo) {
+            const error = new Error('Este cliente no tiene permiso para reservar.');
+            error.code = 'CLIENTE_BLOQUEADO';
+            throw error;
+        }
         
         const dataForSupabase = {
             negocio_id: negocioId,

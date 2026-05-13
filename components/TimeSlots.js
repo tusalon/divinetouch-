@@ -1,13 +1,15 @@
-﻿// components/TimeSlots.js - Versión femenina con filtro de horarios permitidos por servicio
+// components/TimeSlots.js - Versión femenina con filtro de horarios permitidos por servicio
 
 function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
     const [slots, setSlots] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [horariosPorDia, setHorariosPorDia] = React.useState({});
+    const [descansosPorDia, setDescansosPorDia] = React.useState({});
     const [diaTrabaja, setDiaTrabaja] = React.useState(true);
     const [verificacionCompleta, setVerificacionCompleta] = React.useState(false);
     const [maxAntelacionDias, setMaxAntelacionDias] = React.useState(30);
+    const [minAntelacionHoras, setMinAntelacionHoras] = React.useState(2);
 
     const indiceToHoraLegible = (indice) => {
         const horas = Math.floor(indice / 2);
@@ -23,6 +25,9 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                     console.log('⚙️ Configuración cargada en TimeSlots:', config);
                     if (config && config.max_antelacion_dias) {
                         setMaxAntelacionDias(config.max_antelacion_dias);
+                    }
+                    if (config && config.min_antelacion_horas !== undefined) {
+                        setMinAntelacionHoras(config.min_antelacion_horas);
                     }
                 }
             } catch (error) {
@@ -52,6 +57,15 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
         return hours * 60 + minutes;
     };
 
+    const slotTieneDescanso = (slotStart, slotEnd, descansosDelDia = []) => {
+        return descansosDelDia.some(descanso => {
+            if (!descanso?.inicio || !descanso?.fin) return false;
+            const descansoStart = timeToMinutes(descanso.inicio);
+            const descansoEnd = timeToMinutes(descanso.fin);
+            return (slotStart < descansoEnd) && (slotEnd > descansoStart);
+        });
+    };
+
     React.useEffect(() => {
         if (!profesional) return;
         
@@ -60,8 +74,12 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
             try {
                 console.log(`📅 Cargando horarios por día de ${profesional.nombre}...`);
                 const horarios = await window.salonConfig.getHorariosPorDia(profesional.id);
+                const descansos = window.salonConfig.getDescansosPorDia ?
+                    await window.salonConfig.getDescansosPorDia(profesional.id) :
+                    {};
                 console.log(`✅ Horarios por día de ${profesional.nombre}:`, horarios);
                 setHorariosPorDia(horarios);
+                setDescansosPorDia(descansos);
                 
                 const tieneHorarios = Object.keys(horarios).length > 0;
                 if (!tieneHorarios) {
@@ -139,6 +157,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 const diaSemana = diasSemana[fechaLocal.getDay()];
                 
                 const indicesDelDia = horariosPorDia[diaSemana] || [];
+                const descansosDelDia = descansosPorDia[diaSemana] || [];
                 
                 if (indicesDelDia.length === 0) {
                     console.log(`⚠️ No hay horas configuradas para ${diaSemana}`);
@@ -165,7 +184,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 const horaActual = ahora.getHours();
                 const minutosActuales = ahora.getMinutes();
                 const totalMinutosActual = horaActual * 60 + minutosActuales;
-                const minAllowedMinutes = totalMinutosActual + 120;
+                const minAllowedMinutes = totalMinutosActual + (minAntelacionHoras * 60);
                 
                 console.log('🕐 Hora actual:', `${horaActual}:${minutosActuales}`);
                 console.log('⏱️ Hora mínima permitida (actual + 2h):', 
@@ -180,6 +199,10 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
 
                     if (esHoy && slotStart < minAllowedMinutes) {
                         console.log(`⏰ Slot ${slotStartStr} es menor a hora mínima - EXCLUIDO`);
+                        return false;
+                    }
+
+                    if (slotTieneDescanso(slotStart, slotEnd, descansosDelDia)) {
                         return false;
                     }
 
@@ -210,7 +233,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
         };
 
         loadSlots();
-    }, [service, date, profesional, horariosPorDia, diaTrabaja, verificacionCompleta, maxAntelacionDias]);
+    }, [service, date, profesional, horariosPorDia, descansosPorDia, diaTrabaja, verificacionCompleta, maxAntelacionDias, minAntelacionHoras]);
 
     if (!service || !date || !profesional) return null;
 
@@ -222,7 +245,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                     4. Elegí un horario con {profesional.nombre}
                 </h2>
                 <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
                 </div>
             </div>
         );
@@ -241,12 +264,12 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                     <span className="text-2xl">⏰</span>
                     4. Elegí un horario con {profesional.nombre}
                 </h2>
-                <div className="text-center p-8 bg-purple-50 rounded-xl border border-purple-200">
-                    <div className="text-5xl text-purple-400 mb-3">📅❌</div>
+                <div className="text-center p-8 bg-pink-50 rounded-xl border border-pink-200">
+                    <div className="text-5xl text-pink-400 mb-3">📅❌</div>
                     <p className="text-pink-700 font-medium">
                         {profesional.nombre} no trabaja los {diaCapitalizado}s
                     </p>
-                    <p className="text-sm text-purple-600 mt-1">Elegí otro día de la semana</p>
+                    <p className="text-sm text-pink-500 mt-1">Elegí otro día de la semana</p>
                 </div>
             </div>
         );
@@ -258,7 +281,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 <span className="text-2xl">⏰</span>
                 4. Elegí un horario con {profesional.nombre}
                 {selectedTime && (
-                    <span className="text-xs bg-purple-100 text-pink-700 px-2 py-1 rounded-full ml-2">
+                    <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full ml-2">
                         ✓ Horario seleccionado
                     </span>
                 )}
@@ -266,23 +289,23 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
 
             {loading ? (
                 <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
                 </div>
             ) : error ? (
-                <div className="p-4 bg-purple-50 text-purple-700 rounded-lg text-sm border border-purple-200">{error}</div>
+                <div className="p-4 bg-pink-50 text-pink-600 rounded-lg text-sm border border-pink-200">{error}</div>
             ) : slots.length === 0 ? (
-                <div className="text-center p-8 bg-purple-50 rounded-xl border border-purple-200">
-                    <div className="text-5xl text-purple-400 mb-3">⏰❌</div>
+                <div className="text-center p-8 bg-pink-50 rounded-xl border border-pink-200">
+                    <div className="text-5xl text-pink-400 mb-3">⏰❌</div>
                     <p className="text-pink-700 font-medium">
                         No hay horarios disponibles para {profesional.nombre} el {formatDateLocal(date)}
                     </p>
-                    <p className="text-sm text-purple-600 mt-1">Probá con otra fecha</p>
+                    <p className="text-sm text-pink-500 mt-1">Probá con otra fecha</p>
                 </div>
             ) : (
                 <>
-                    <div className="text-sm bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+                    <div className="text-sm bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-xl border border-pink-200">
                         <div className="flex items-center gap-2 text-pink-700">
-                            <span className="text-purple-600">⏰</span>
+                            <span className="text-pink-500">⏰</span>
                             <span className="font-medium">
                                 Horarios disponibles de {profesional.nombre} para {formatDateLocal(date)}:
                             </span>
@@ -290,11 +313,11 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                     </div>
                     
                     {date === getCurrentLocalDate() && (
-                        <div className="text-sm text-purple-700 bg-purple-50 p-3 rounded-lg flex items-center gap-2 border border-purple-200">
-                            <span className="text-purple-600">⏰</span>
+                        <div className="text-sm text-pink-600 bg-pink-50 p-3 rounded-lg flex items-center gap-2 border border-pink-200">
+                            <span className="text-pink-500">⏰</span>
                             <span>
-                                Solo se muestran horarios con al menos 2 horas de anticipación 
-                                (hora actual + 2h)
+                                Solo se muestran horarios con al menos {minAntelacionHoras} horas de anticipación 
+                                (hora actual + {minAntelacionHoras}h)
                             </span>
                         </div>
                     )}
@@ -312,8 +335,8 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                                     className={`
                                         py-3 px-2 rounded-lg text-base font-semibold transition-all transform flex flex-col items-center
                                         ${isSelected
-                                            ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg scale-105 ring-2 ring-purple-300'
-                                            : 'bg-white text-pink-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 hover:scale-105 hover:shadow-md'}
+                                            ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg scale-105 ring-2 ring-pink-300'
+                                            : 'bg-white text-pink-700 border-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 hover:scale-105 hover:shadow-md'}
                                     `}
                                 >
                                     <span className="text-sm">{esMediaHora ? '⏱️' : '⌛'}</span>
@@ -323,7 +346,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                         })}
                     </div>
                     
-                    <p className="text-xs text-purple-400 mt-3 text-center">
+                    <p className="text-xs text-pink-400 mt-3 text-center">
                         ⏰ Horarios cada 30 minutos
                     </p>
                 </>

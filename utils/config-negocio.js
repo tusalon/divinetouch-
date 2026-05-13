@@ -1,12 +1,12 @@
-﻿// utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
-// CLIENTE: Divine touch
+// utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
+// CLIENTE: Divine Touch
 
 console.log('🏢 config-negocio.js cargado');
 
 // ============================================
 // 🔥 CONFIGURACIÓN POR CLIENTE - ¡LO ÚNICO QUE CAMBIA!
 // ============================================
-const NEGOCIO_ID_POR_DEFECTO = '720093d9-e7a0-43e3-9d5e-9c505966f0ac'; // ID de Divine touch
+const NEGOCIO_ID_POR_DEFECTO = '720093d9-e7a0-43e3-9d5e-9c505966f0ac'; // ID de Divine Touch
 
 // Hacer accesible globalmente
 window.NEGOCIO_ID_POR_DEFECTO = NEGOCIO_ID_POR_DEFECTO;
@@ -116,7 +116,7 @@ window.cargarConfiguracionNegocio = async function(forceRefresh = false) {
  */
 window.getNombreNegocio = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.nombre || 'Divine touch';
+    return config?.nombre || 'Divine Touch';
 };
 
 /**
@@ -164,7 +164,7 @@ window.getHorarioAtencion = async function() {
  */
 window.getMensajeBienvenida = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.mensaje_bienvenida || '¡Bienvenida a Divine touch!';
+    return config?.mensaje_bienvenida || '¡Bienvenida a Divine Touch!';
 };
 
 /**
@@ -180,7 +180,7 @@ window.getMensajeConfirmacion = async function() {
  */
 window.getNtfyTopic = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.ntfy_topic || 'divine-touch';
+    return config?.ntfy_topic || 'divinetouch-';
 };
 
 /**
@@ -205,5 +205,5 @@ setTimeout(async () => {
     await window.cargarConfiguracionNegocio();
 }, 500);
 
-console.log('✅ config-negocio.js listo para Divine touch');
+console.log('✅ config-negocio.js listo para Divine Touch');
 console.log('🏷️  ID configurado:', NEGOCIO_ID_POR_DEFECTO);
