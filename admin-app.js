@@ -1905,6 +1905,80 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
         return agendaBookings.filter(b => b.fecha === dateStr);
     };
 
+    const getBookingEndMinutes = (booking) => {
+        const start = timeToMinutes(booking.hora_inicio);
+        const end = timeToMinutes(booking.hora_fin || calculateEndTime(booking.hora_inicio, booking.duracion || 60));
+        return end > start ? end : start + Number(booking.duracion || 60);
+    };
+
+    const getAgendaLayoutBookings = (dayBookings = []) => {
+        const sorted = [...dayBookings].sort((a, b) => {
+            const startDiff = timeToMinutes(a.hora_inicio) - timeToMinutes(b.hora_inicio);
+            if (startDiff !== 0) return startDiff;
+            return getBookingEndMinutes(a) - getBookingEndMinutes(b);
+        });
+
+        const clusters = [];
+        let cluster = [];
+        let clusterEnd = -1;
+
+        sorted.forEach(booking => {
+            const start = timeToMinutes(booking.hora_inicio);
+            const end = getBookingEndMinutes(booking);
+
+            if (cluster.length === 0 || start < clusterEnd) {
+                cluster.push(booking);
+                clusterEnd = Math.max(clusterEnd, end);
+            } else {
+                clusters.push(cluster);
+                cluster = [booking];
+                clusterEnd = end;
+            }
+        });
+
+        if (cluster.length > 0) clusters.push(cluster);
+
+        return clusters.flatMap(group => {
+            const columnEnds = [];
+            const positioned = group.map(booking => {
+                const start = timeToMinutes(booking.hora_inicio);
+                const end = getBookingEndMinutes(booking);
+                let columnIndex = columnEnds.findIndex(columnEnd => start >= columnEnd);
+
+                if (columnIndex === -1) {
+                    columnIndex = columnEnds.length;
+                    columnEnds.push(end);
+                } else {
+                    columnEnds[columnIndex] = end;
+                }
+
+                return { ...booking, _agendaColumn: columnIndex };
+            });
+
+            const columnCount = Math.max(1, columnEnds.length);
+            return positioned.map(booking => ({
+                ...booking,
+                _agendaColumns: columnCount
+            }));
+        });
+    };
+
+    const getAgendaBookingStyle = (booking) => {
+        const columns = Math.max(1, booking._agendaColumns || 1);
+        const column = Math.min(columns - 1, Math.max(0, booking._agendaColumn || 0));
+        const widthPercent = 100 / columns;
+        const leftPercent = column * widthPercent;
+        const rightPercent = 100 - leftPercent - widthPercent;
+        const halfGap = columns > 1 ? 3 : 0;
+
+        return {
+            top: `${getBookingTop(booking)}px`,
+            height: `${getBookingHeight(booking)}px`,
+            left: `calc(${leftPercent}% + 0.5rem + ${column > 0 ? halfGap : 0}px)`,
+            right: `calc(${rightPercent}% + 0.5rem + ${column < columns - 1 ? halfGap : 0}px)`
+        };
+    };
+
     const getBookingTop = (booking) => {
         return Math.max(0, (timeToMinutes(booking.hora_inicio) - agendaStartMinutes) * agendaPxPerMinute);
     };
@@ -2653,13 +2727,13 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                             </div>
                                         )}
 
-                                        {agendaDayBookings.map(booking => {
+                                        {getAgendaLayoutBookings(agendaDayBookings).map(booking => {
                                             const statusClass = agendaStatusStyle[booking.estado] || 'bg-gray-500 border-gray-600 text-white';
                                             return (
                                                 <div
                                                     key={booking._grupoVisualId || booking.id}
-                                                    className={`absolute left-2 right-2 rounded-lg border shadow-sm p-3 overflow-hidden ${statusClass}`}
-                                                    style={{ top: `${getBookingTop(booking)}px`, height: `${getBookingHeight(booking)}px` }}
+                                                    className={`absolute rounded-lg border shadow-sm p-3 overflow-hidden ${statusClass}`}
+                                                    style={getAgendaBookingStyle(booking)}
                                                 >
                                                     <div className="flex h-full justify-between gap-3">
                                                         <div className="min-w-0">
@@ -2726,13 +2800,13 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                                     <div key={hour} className="border-b border-gray-100" style={{ height: `${60 * agendaPxPerMinute}px` }}></div>
                                                 ))}
 
-                                                {dayBookings.map(booking => {
+                                                {getAgendaLayoutBookings(dayBookings).map(booking => {
                                                     const statusClass = agendaStatusStyle[booking.estado] || 'bg-gray-500 border-gray-600 text-white';
                                                     return (
                                                         <div
                                                             key={booking._grupoVisualId || booking.id}
-                                                            className={`absolute left-2 right-2 rounded-lg border shadow-sm p-2 overflow-hidden ${statusClass}`}
-                                                            style={{ top: `${getBookingTop(booking)}px`, height: `${getBookingHeight(booking)}px` }}
+                                                            className={`absolute rounded-lg border shadow-sm p-2 overflow-hidden ${statusClass}`}
+                                                            style={getAgendaBookingStyle(booking)}
                                                             title={`${booking.cliente_nombre} - ${booking._grupoVisual ? `${booking._reservasGrupo.length} servicios: ` : ''}${booking.servicio}`}
                                                         >
                                                             <div className="flex items-start justify-between gap-2">
