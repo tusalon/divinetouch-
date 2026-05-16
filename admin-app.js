@@ -1989,6 +1989,10 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
         return Math.max(44, (end - start) * agendaPxPerMinute - 4);
     };
 
+    const agendaDayLayoutBookings = getAgendaLayoutBookings(agendaDayBookings);
+    const agendaDayMaxColumns = Math.max(1, ...agendaDayLayoutBookings.map(b => b._agendaColumns || 1));
+    const agendaDayMinWidth = Math.max(0, 72 + (agendaDayMaxColumns * 180));
+
     const normalizePhone = (phone) => String(phone || '').replace(/\D/g, '').replace(/^53/, '');
 
     const getClienteScore = (cliente) => {
@@ -2706,8 +2710,8 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                         </div>
 
                         {agendaMode === 'dia' && (
-                            <div className="p-3 sm:p-5">
-                                <div className="relative border rounded-xl overflow-hidden bg-white" style={{ height: `${agendaGridHeight}px` }}>
+                            <div className="p-3 sm:p-5 overflow-x-auto">
+                                <div className="relative border rounded-xl overflow-hidden bg-white" style={{ height: `${agendaGridHeight}px`, minWidth: `${agendaDayMinWidth}px` }}>
                                     <div className="absolute left-0 top-0 bottom-0 w-16 bg-gray-50 border-r z-0">
                                         {agendaHours.map(hour => (
                                             <div key={hour} className="relative border-b border-gray-100 text-right pr-2 text-xs text-gray-400" style={{ height: `${60 * agendaPxPerMinute}px` }}>
@@ -2727,23 +2731,28 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                             </div>
                                         )}
 
-                                        {getAgendaLayoutBookings(agendaDayBookings).map(booking => {
+                                        {agendaDayLayoutBookings.map(booking => {
                                             const statusClass = agendaStatusStyle[booking.estado] || 'bg-gray-500 border-gray-600 text-white';
+                                            const compactBooking = (booking._agendaColumns || 1) > 1;
+                                            const canEdit = booking.estado === 'Reservado' || booking.estado === 'Pendiente';
                                             return (
                                                 <div
                                                     key={booking._grupoVisualId || booking.id}
-                                                    className={`absolute rounded-lg border shadow-sm p-3 overflow-hidden ${statusClass}`}
+                                                    className={`absolute rounded-lg border shadow-sm overflow-hidden ${compactBooking ? 'p-2' : 'p-3'} ${statusClass}`}
                                                     style={getAgendaBookingStyle(booking)}
+                                                    title={`${booking.cliente_nombre} - ${booking._grupoVisual ? `${booking._reservasGrupo.length} servicios: ` : ''}${booking.servicio}`}
                                                 >
-                                                    <div className="flex h-full justify-between gap-3">
+                                                    <div className={`${compactBooking ? 'flex h-full flex-col gap-1' : 'flex h-full justify-between gap-3'}`}>
                                                         <div className="min-w-0">
-                                                            <p className="text-xs font-bold opacity-90">{formatTo12Hour(booking.hora_inicio)} - {formatTo12Hour(booking.hora_fin || calculateEndTime(booking.hora_inicio, booking.duracion || 60))}</p>
-                                                            <p className="text-base font-bold truncate">{booking.cliente_nombre}</p>
-                                                            <p className="text-sm truncate opacity-90">{booking._grupoVisual ? `${booking._reservasGrupo.length} servicios ¬∑ ${booking.servicio}` : booking.servicio}</p>
-                                                            <p className="text-xs truncate opacity-80">{booking.profesional_nombre || booking.trabajador_nombre || 'Sin profesional'}</p>
+                                                            <p className={`${compactBooking ? 'text-[11px]' : 'text-xs'} font-bold leading-tight opacity-90`}>{formatTo12Hour(booking.hora_inicio)} - {formatTo12Hour(booking.hora_fin || calculateEndTime(booking.hora_inicio, booking.duracion || 60))}</p>
+                                                            <p className={`${compactBooking ? 'text-sm' : 'text-base'} font-bold truncate`}>{booking.cliente_nombre}</p>
+                                                            <p className={`${compactBooking ? 'text-xs' : 'text-sm'} truncate opacity-90`}>{booking._grupoVisual ? `${booking._reservasGrupo.length} servicios ¬∑ ${booking.servicio}` : booking.servicio}</p>
+                                                            {!compactBooking && (
+                                                                <p className="text-xs truncate opacity-80">{booking.profesional_nombre || booking.trabajador_nombre || 'Sin profesional'}</p>
+                                                            )}
                                                         </div>
-                                                        {(booking.estado === 'Reservado' || booking.estado === 'Pendiente') && (
-                                                            <button onClick={() => abrirModalReprogramar(booking)} className="self-start shrink-0 bg-white/20 hover:bg-white/30 rounded-full px-3 py-1 text-xs font-bold">
+                                                        {canEdit && (
+                                                            <button onClick={() => abrirModalReprogramar(booking)} className={`${compactBooking ? 'mt-auto w-full rounded-md py-1 text-[11px]' : 'self-start shrink-0 rounded-full px-3 py-1 text-xs'} bg-white/20 hover:bg-white/30 font-bold`}>
                                                                 Editar
                                                             </button>
                                                         )}
@@ -2758,8 +2767,8 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
 
                         {agendaMode === 'semana' && (
                         <div className="overflow-x-auto">
-                            <div className="min-w-[1080px]">
-                                <div className="grid grid-cols-[72px_repeat(7,minmax(140px,1fr))] border-b bg-white sticky top-0 z-10">
+                            <div className="min-w-[1440px]">
+                                <div className="grid grid-cols-[72px_repeat(7,minmax(190px,1fr))] border-b bg-white sticky top-0 z-10">
                                     <div className="p-3 text-xs font-semibold text-gray-400 border-r">Hora</div>
                                     {agendaDays.map(day => {
                                         const dateStr = formatDate(day);
@@ -2781,7 +2790,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                     })}
                                 </div>
 
-                                <div className="grid grid-cols-[72px_repeat(7,minmax(140px,1fr))] relative" style={{ height: `${agendaGridHeight}px` }}>
+                                <div className="grid grid-cols-[72px_repeat(7,minmax(190px,1fr))] relative" style={{ height: `${agendaGridHeight}px` }}>
                                     <div className="border-r bg-gray-50">
                                         {agendaHours.map(hour => (
                                             <div key={hour} className="relative border-b border-gray-100 text-right pr-2 text-xs text-gray-400" style={{ height: `${60 * agendaPxPerMinute}px` }}>
