@@ -385,6 +385,7 @@ function AdminApp() {
     const [tabActivo, setTabActivo] = React.useState('reservas');
     const [agendaDate, setAgendaDate] = React.useState(new Date());
     const [agendaMode, setAgendaMode] = React.useState('dia');
+    const [agendaDetalleBooking, setAgendaDetalleBooking] = React.useState(null);
     
     const [showClientesRegistrados, setShowClientesRegistrados] = React.useState(false);
     const [clientesRegistrados, setClientesRegistrados] = React.useState([]);
@@ -1899,6 +1900,11 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
         Pendiente: 'bg-amber-400 border-amber-500 text-amber-950',
         Completado: 'bg-emerald-500 border-emerald-600 text-white'
     };
+    const estadoNormalizado = (estado) => String(estado || '').trim().toLowerCase();
+    const puedeEditarReserva = (booking) => {
+        const estado = estadoNormalizado(booking.estado);
+        return estado !== 'cancelado' && estado !== 'cancelada' && estado !== 'completado' && estado !== 'completada';
+    };
 
     const getAgendaDayBookings = (date) => {
         const dateStr = formatDate(date);
@@ -2088,6 +2094,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
 
     const abrirModalReprogramar = (booking) => {
         const servicio = serviciosList.find(s => s.nombre === booking.servicio);
+        setAgendaDetalleBooking(null);
         setReservaEditando(booking);
         setNuevaReservaData({
             cliente_nombre: booking.cliente_nombre || '',
@@ -2108,6 +2115,10 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
         setBusquedaClienteManual('');
         loadClientesRegistrados();
         setShowNuevaReservaModal(true);
+    };
+
+    const abrirDetalleAgenda = (booking) => {
+        setAgendaDetalleBooking(booking);
     };
 
     const abrirModalDisponibilidad = () => {
@@ -2425,6 +2436,80 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                     </div>
                 )}
 
+                {agendaDetalleBooking && (() => {
+                    const booking = agendaDetalleBooking;
+                    const inicio = booking.hora_inicio;
+                    const fin = booking.hora_fin || calculateEndTime(booking.hora_inicio, booking.duracion || 60);
+                    const reservasGrupo = booking._reservasGrupo || [];
+                    const editable = puedeEditarReserva(booking);
+                    const fechaDetalle = window.formatFechaCompleta ? window.formatFechaCompleta(booking.fecha) : booking.fecha;
+                    const profesionalDetalle = booking.profesional_nombre || booking.trabajador_nombre || 'Sin profesional';
+
+                    return (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl max-w-md w-full overflow-hidden shadow-xl">
+                                <div className="bg-pink-500 text-white p-4 flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-xs uppercase font-bold opacity-80">{booking.estado || 'Reserva'}</p>
+                                        <h3 className="text-xl font-bold truncate">{booking.cliente_nombre || 'Cliente sin nombre'}</h3>
+                                        <p className="text-sm opacity-90">{formatTo12Hour(inicio)} - {formatTo12Hour(fin)}</p>
+                                    </div>
+                                    <button onClick={() => setAgendaDetalleBooking(null)} className="text-white/80 hover:text-white text-2xl leading-none">√É‚Äî</button>
+                                </div>
+
+                                <div className="p-4 space-y-3 text-sm">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="rounded-lg bg-gray-50 p-3">
+                                            <p className="text-xs text-gray-500">Fecha</p>
+                                            <p className="font-semibold text-gray-900">{fechaDetalle}</p>
+                                        </div>
+                                        <div className="rounded-lg bg-gray-50 p-3">
+                                            <p className="text-xs text-gray-500">Duraci√≥n</p>
+                                            <p className="font-semibold text-gray-900">{Math.max(0, timeToMinutes(fin) - timeToMinutes(inicio))} min</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-lg border border-gray-100 p-3">
+                                        <p className="text-xs text-gray-500">Servicio</p>
+                                        <p className="font-semibold text-gray-900">{booking.servicio || 'Sin servicio'}</p>
+                                    </div>
+
+                                    <div className="rounded-lg border border-gray-100 p-3">
+                                        <p className="text-xs text-gray-500">Profesional</p>
+                                        <p className="font-semibold text-gray-900">{profesionalDetalle}</p>
+                                    </div>
+
+                                    <div className="rounded-lg border border-gray-100 p-3">
+                                        <p className="text-xs text-gray-500">WhatsApp</p>
+                                        <p className="font-semibold text-gray-900">{booking.cliente_whatsapp || 'No registrado'}</p>
+                                    </div>
+
+                                    {reservasGrupo.length > 1 && (
+                                        <div className="rounded-lg bg-pink-50 border border-pink-100 p-3 space-y-2">
+                                            <p className="text-xs font-bold text-pink-700">Servicios de esta cita</p>
+                                            {reservasGrupo.map(item => (
+                                                <div key={item.id} className="text-xs text-gray-700">
+                                                    <span className="font-semibold">{formatTo12Hour(item.hora_inicio)} - {formatTo12Hour(item.hora_fin || calculateEndTime(item.hora_inicio, item.duracion || 60))}</span>
+                                                    <span> √Ç¬∑ {item.servicio}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-4 bg-gray-50 flex gap-3">
+                                    <button onClick={() => setAgendaDetalleBooking(null)} className="flex-1 px-4 py-2 border rounded-lg bg-white">Cerrar</button>
+                                    {editable && (
+                                        <button onClick={() => abrirModalReprogramar(booking)} className="flex-1 px-4 py-2 bg-pink-500 text-white rounded-lg font-semibold">
+                                            Editar
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 {/* MODAL CALENDARIO DE DISPONIBILIDAD */}
                 {showDisponibilidadModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -2734,13 +2819,15 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                         {agendaDayLayoutBookings.map(booking => {
                                             const statusClass = agendaStatusStyle[booking.estado] || 'bg-gray-500 border-gray-600 text-white';
                                             const compactBooking = (booking._agendaColumns || 1) > 1;
-                                            const canEdit = booking.estado === 'Reservado' || booking.estado === 'Pendiente';
+                                            const canEdit = puedeEditarReserva(booking);
                                             return (
                                                 <div
                                                     key={booking._grupoVisualId || booking.id}
-                                                    className={`absolute rounded-lg border shadow-sm overflow-hidden ${compactBooking ? 'p-2' : 'p-3'} ${statusClass}`}
+                                                    className={`absolute rounded-lg border shadow-sm overflow-hidden ${compactBooking ? 'p-2' : 'p-3'} ${canEdit ? 'cursor-pointer' : ''} ${statusClass}`}
                                                     style={getAgendaBookingStyle(booking)}
                                                     title={`${booking.cliente_nombre} - ${booking._grupoVisual ? `${booking._reservasGrupo.length} servicios: ` : ''}${booking.servicio}`}
+                                                    onClick={() => abrirDetalleAgenda(booking)}
+                                                    role="button"
                                                 >
                                                     <div className={`${compactBooking ? 'flex h-full flex-col gap-1' : 'flex h-full justify-between gap-3'}`}>
                                                         <div className="min-w-0">
@@ -2752,8 +2839,8 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                                             )}
                                                         </div>
                                                         {canEdit && (
-                                                            <button onClick={() => abrirModalReprogramar(booking)} className={`${compactBooking ? 'mt-auto w-full rounded-md py-1 text-[11px]' : 'self-start shrink-0 rounded-full px-3 py-1 text-xs'} bg-white/20 hover:bg-white/30 font-bold`}>
-                                                                Editar
+                                                            <button onClick={(event) => { event.stopPropagation(); abrirDetalleAgenda(booking); }} className={`${compactBooking ? 'mt-auto w-full rounded-md py-1 text-[11px]' : 'self-start shrink-0 rounded-full px-3 py-1 text-xs'} bg-white/20 hover:bg-white/30 font-bold`}>
+                                                                Ver
                                                             </button>
                                                         )}
                                                     </div>
@@ -2811,12 +2898,15 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
 
                                                 {getAgendaLayoutBookings(dayBookings).map(booking => {
                                                     const statusClass = agendaStatusStyle[booking.estado] || 'bg-gray-500 border-gray-600 text-white';
+                                                    const canEdit = puedeEditarReserva(booking);
                                                     return (
                                                         <div
                                                             key={booking._grupoVisualId || booking.id}
-                                                            className={`absolute rounded-lg border shadow-sm p-2 overflow-hidden ${statusClass}`}
+                                                            className={`absolute rounded-lg border shadow-sm p-2 overflow-hidden ${canEdit ? 'cursor-pointer' : ''} ${statusClass}`}
                                                             style={getAgendaBookingStyle(booking)}
                                                             title={`${booking.cliente_nombre} - ${booking._grupoVisual ? `${booking._reservasGrupo.length} servicios: ` : ''}${booking.servicio}`}
+                                                            onClick={() => abrirDetalleAgenda(booking)}
+                                                            role="button"
                                                         >
                                                             <div className="flex items-start justify-between gap-2">
                                                                 <div className="min-w-0">
@@ -2825,9 +2915,9 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                                                     <p className="text-xs truncate opacity-90">{booking._grupoVisual ? `${booking._reservasGrupo.length} servicios ¬∑ ${booking.servicio}` : booking.servicio}</p>
                                                                     <p className="text-xs truncate opacity-80">{booking.profesional_nombre || booking.trabajador_nombre || 'Sin profesional'}</p>
                                                                 </div>
-                                                                {(booking.estado === 'Reservado' || booking.estado === 'Pendiente') && (
-                                                                    <button onClick={() => abrirModalReprogramar(booking)} className="shrink-0 bg-white/20 hover:bg-white/30 rounded px-2 py-1 text-[11px] font-bold">
-                                                                        Editar
+                                                                {canEdit && (
+                                                                    <button onClick={(event) => { event.stopPropagation(); abrirDetalleAgenda(booking); }} className="shrink-0 bg-white/20 hover:bg-white/30 rounded px-2 py-1 text-[11px] font-bold">
+                                                                        Ver
                                                                     </button>
                                                                 )}
                                                             </div>
