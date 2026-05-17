@@ -397,6 +397,8 @@ function AdminApp() {
     const [busquedaClienteManual, setBusquedaClienteManual] = React.useState('');
 
     const [showNuevaReservaModal, setShowNuevaReservaModal] = React.useState(false);
+    const [creandoReservaManual, setCreandoReservaManual] = React.useState(false);
+    const creandoReservaManualRef = React.useRef(false);
     const [reservaEditando, setReservaEditando] = React.useState(null);
     const [nuevaReservaData, setNuevaReservaData] = React.useState({
         cliente_nombre: '',
@@ -1179,12 +1181,17 @@ function AdminApp() {
     // CREAR RESERVA MANUAL
     // ============================================
     const handleCrearReservaManual = async () => {
+        if (creandoReservaManualRef.current) return;
+
         if (!nuevaReservaData.cliente_nombre || !nuevaReservaData.cliente_whatsapp || 
             !nuevaReservaData.servicio || !nuevaReservaData.profesional_id || 
             !nuevaReservaData.fecha || !nuevaReservaData.hora_inicio) {
             alert('Complet√° todos los campos');
             return;
         }
+
+        creandoReservaManualRef.current = true;
+        setCreandoReservaManual(true);
 
         try {
             const serviciosSeleccionados = getServiciosManualSeleccionados();
@@ -1358,6 +1365,9 @@ function AdminApp() {
         } catch (error) {
             console.error('Error creando reserva:', error);
             alert('Error al crear la reserva: ' + error.message);
+        } finally {
+            creandoReservaManualRef.current = false;
+            setCreandoReservaManual(false);
         }
     };
 
@@ -2416,7 +2426,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                     </div>
                                 )}
                                 <div className="flex gap-3 pt-4">
-                                    <button onClick={() => { setShowNuevaReservaModal(false); setReservaEditando(null); setServiciosManualSeleccionados([]); }} className="flex-1 px-4 py-2 border rounded-lg">Cancelar</button>
+                                    <button onClick={() => { setShowNuevaReservaModal(false); setReservaEditando(null); setServiciosManualSeleccionados([]); }} disabled={creandoReservaManual} className="flex-1 px-4 py-2 border rounded-lg disabled:opacity-60 disabled:cursor-not-allowed">Cancelar</button>
                                     {reservaEditando?.estado === 'Pendiente' && (
                                         <button
                                             onClick={async () => {
@@ -2429,7 +2439,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                             Confirmar pago
                                         </button>
                                     )}
-                                    <button onClick={handleCrearReservaManual} className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg">{reservaEditando ? 'Guardar cambios' : 'Crear Reserva'}</button>
+                                    <button onClick={handleCrearReservaManual} disabled={creandoReservaManual} className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60 disabled:cursor-not-allowed">{creandoReservaManual ? 'Guardando...' : (reservaEditando ? 'Guardar cambios' : 'Crear Reserva')}</button>
                                 </div>
                             </div>
                         </div>
