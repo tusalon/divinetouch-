@@ -1,6 +1,6 @@
 // sw.js - Service Worker para Divine Touch
 
-const CACHE_NAME = 'divinetouch--v25';
+const CACHE_NAME = 'divinetouch--v26';
 const urlsToCache = [
   '/divinetouch-/',
   '/divinetouch-/index.html',

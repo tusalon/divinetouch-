@@ -2840,7 +2840,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                                         </div>
                                                         {canEdit && (
                                                             <button onClick={(event) => { event.stopPropagation(); abrirDetalleAgenda(booking); }} className={`${compactBooking ? 'mt-auto w-full rounded-md py-1 text-[11px]' : 'self-start shrink-0 rounded-full px-3 py-1 text-xs'} bg-white/20 hover:bg-white/30 font-bold`}>
-                                                                Ver
+                                                                Detalles
                                                             </button>
                                                         )}
                                                     </div>
@@ -2917,7 +2917,7 @@ Cualquier cambio, pod√©s cancelarlo desde la app con hasta 1 hora de anticipaci√
                                                                 </div>
                                                                 {canEdit && (
                                                                     <button onClick={(event) => { event.stopPropagation(); abrirDetalleAgenda(booking); }} className="shrink-0 bg-white/20 hover:bg-white/30 rounded px-2 py-1 text-[11px] font-bold">
-                                                                        Ver
+                                                                        Detalles
                                                                     </button>
                                                                 )}
                                                             </div>
