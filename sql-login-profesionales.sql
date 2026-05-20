@@ -21,7 +21,7 @@ as $$
 declare
     v_hash text;
 begin
-    v_hash := 'sha256$' || encode(digest(coalesce(p_password, ''), 'sha256'), 'hex');
+    v_hash := 'sha256$' || encode(digest(convert_to(coalesce(p_password, ''), 'UTF8'), 'sha256'), 'hex');
 
     return query
     select
