@@ -1,7 +1,7 @@
 -- Login seguro de profesionales para el panel.
 -- Ejecutar una vez en Supabase SQL Editor.
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 create or replace function public.login_profesional(
     p_negocio_id uuid,
@@ -16,12 +16,12 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
     v_hash text;
 begin
-    v_hash := 'sha256$' || encode(digest(convert_to(coalesce(p_password, ''), 'UTF8'), 'sha256'), 'hex');
+    v_hash := 'sha256$' || encode(extensions.digest(convert_to(coalesce(p_password, ''), 'UTF8'), 'sha256'::text), 'hex');
 
     return query
     select
