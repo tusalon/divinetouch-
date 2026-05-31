@@ -1,6 +1,6 @@
 // sw.js - Service Worker para Divine Touch
 
-const CACHE_NAME = 'divinetouch--v29';
+const CACHE_NAME = 'divinetouch--v47';
 const urlsToCache = [
   '/divinetouch-/',
   '/divinetouch-/index.html',
@@ -17,7 +17,14 @@ const urlsToCache = [
   '/divinetouch-/icons/icon-152x152.png',
   '/divinetouch-/icons/icon-192x192.png',
   '/divinetouch-/icons/icon-384x384.png',
-  '/divinetouch-/icons/icon-512x512.png'
+  '/divinetouch-/icons/icon-512x512.png',
+  '/divinetouch-/vendor/react.production.min.js',
+  '/divinetouch-/vendor/react-dom.production.min.js',
+  '/divinetouch-/vendor/babel.min.js',
+  '/divinetouch-/vendor/bcrypt.min.js',
+  '/divinetouch-/vendor/tailwind-browser.js',
+  '/divinetouch-/vendor/lucide/lucide.css',
+  '/divinetouch-/vendor/lucide/lucide.woff2'
 ];
 
 // ============================================
