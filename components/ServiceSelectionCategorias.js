@@ -59,6 +59,7 @@ function ServiceSelection({ onSelect, selectedService }) {
     const datosCargadosRef = React.useRef(false);
     const [categoriaActiva, setCategoriaActiva] = React.useState('todos');
     const [serviciosSeleccionados, setServiciosSeleccionados] = React.useState([]);
+    const [busqueda, setBusqueda] = React.useState('');
 
     React.useEffect(() => {
         cargarDatos();
@@ -105,10 +106,16 @@ function ServiceSelection({ onSelect, selectedService }) {
         }
     }, [categoriasVisibles, categoriaActiva]);
 
+    const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
     const serviciosFiltrados = React.useMemo(() => {
-        if (categoriaActiva === 'todos') return services;
-        return services.filter(servicio => inferirCategoriaCliente(servicio, categorias) === categoriaActiva);
-    }, [services, categorias, categoriaActiva]);
+        let lista = categoriaActiva === 'todos' ? services : services.filter(s => inferirCategoriaCliente(s, categorias) === categoriaActiva);
+        if (busqueda.trim()) {
+            const q = normalizar(busqueda);
+            lista = lista.filter(s => normalizar(s.nombre).includes(q) || normalizar(s.descripcion).includes(q));
+        }
+        return lista;
+    }, [services, categorias, categoriaActiva, busqueda]);
 
     const totalSeleccion = React.useMemo(() => {
         return serviciosSeleccionados.reduce((total, servicio) => ({
@@ -182,6 +189,22 @@ function ServiceSelection({ onSelect, selectedService }) {
                 </div>
             ) : (
                 <>
+                    {services.length > 5 && (
+                        <div className="flex items-center border border-pink-200 rounded-xl bg-white/80 focus-within:ring-2 focus-within:ring-pink-400">
+                            <span className="pl-3 text-base flex-shrink-0">🔍</span>
+                            <input
+                                type="text"
+                                value={busqueda}
+                                onChange={e => { setBusqueda(e.target.value); setCategoriaActiva('todos'); }}
+                                placeholder="Buscar servicio..."
+                                className="flex-1 px-3 py-2 bg-transparent text-pink-800 placeholder-pink-300 focus:outline-none text-sm"
+                            />
+                            {busqueda && (
+                                <button onClick={() => setBusqueda('')} className="pr-3 text-pink-400 hover:text-pink-600 text-sm">✕</button>
+                            )}
+                        </div>
+                    )}
+
                     <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                         {categoriasVisibles.map(categoria => {
                             const id = catId(categoria);
@@ -199,6 +222,12 @@ function ServiceSelection({ onSelect, selectedService }) {
                             );
                         })}
                     </div>
+
+                    {busqueda && serviciosFiltrados.length === 0 && (
+                        <div className="text-center py-6 text-pink-400 text-sm">
+                            No hay servicios que coincidan con "{busqueda}"
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 gap-3">
                         {serviciosFiltrados.map(service => {
@@ -227,7 +256,7 @@ function ServiceSelection({ onSelect, selectedService }) {
                                             <span className={`text-xs px-2 py-1 rounded-full border ${estaSeleccionado ? 'bg-pink-600 text-white border-pink-600' : 'bg-white text-pink-600 border-pink-200'}`}>
                                                 {estaSeleccionado ? '✓ Elegido' : 'Agregar'}
                                             </span>
-                                            <span className="text-pink-600 font-bold text-lg">${service.precio}</span>
+                                            <span className="text-pink-600 font-bold text-lg">${parseFloat(service.precio) % 1 === 0 ? parseFloat(service.precio).toFixed(0) : parseFloat(service.precio).toFixed(2)}</span>
                                             <span className="flex items-center text-pink-500 text-xs bg-pink-50 px-2 py-1 rounded-full border border-pink-200">{service.duracion} min</span>
                                         </div>
                                     </div>
@@ -243,7 +272,7 @@ function ServiceSelection({ onSelect, selectedService }) {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <p className="font-bold text-pink-800">
-                                {serviciosSeleccionados.length} servicio{serviciosSeleccionados.length === 1 ? '' : 's'} · {totalSeleccion.duracion} min · ${totalSeleccion.precio}
+                                {serviciosSeleccionados.length} servicio{serviciosSeleccionados.length === 1 ? '' : 's'} · {totalSeleccion.duracion} min · ${totalSeleccion.precio % 1 === 0 ? totalSeleccion.precio.toFixed(0) : totalSeleccion.precio.toFixed(2)}
                             </p>
                             <p className="text-xs text-pink-500 truncate">
                                 {serviciosSeleccionados.map(s => s.nombre).join(' + ')}

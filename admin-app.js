@@ -1,13 +1,10 @@
 // admin-app.js - Panel de administración (VERSIÓN CORREGIDA CON HORARIOS POR DÍA)
 // CON BOTÓN DE NUEVA RESERVA MANUAL, CALENDARIO DE DISPONIBILIDAD
 
-console.log('🚀 ADMIN-APP.JS - Panel de administración con Nueva Reserva y Calendario Disponibilidad');
-
 window.addEventListener('error', function(e) {
     console.error('❌ Error detectado, posible versión antigua:', e.message);
     
     if (e.message.includes('Failed to load') || e.message.includes('Unexpected token')) {
-        console.log('🔄 Forzando recarga por posible versión antigua...');
         
         if (window.swRegistration) {
             window.swRegistration.unregister().then(() => {
@@ -18,25 +15,18 @@ window.addEventListener('error', function(e) {
         }
     }
 });
-
-// ============================================
-// FUNCION PARA OBTENER NEGOCIO_ID
-// ============================================
 function getNegocioId() {
     const localId = localStorage.getItem('negocioId');
     if (localId) {
-        console.log('AdminApp usando negocioId de localStorage:', localId);
         return localId;
     }
     
     if (window.NEGOCIO_ID_POR_DEFECTO) {
-        console.log('AdminApp usando NEGOCIO_ID_POR_DEFECTO:', window.NEGOCIO_ID_POR_DEFECTO);
         return window.NEGOCIO_ID_POR_DEFECTO;
     }
     
     if (typeof window.getNegocioId === 'function') {
         const id = window.getNegocioId();
-        console.log('AdminApp usando window.getNegocioId():', id);
         return id;
     }
     
@@ -44,24 +34,16 @@ function getNegocioId() {
     return null;
 }
 
-// ============================================
-// FUNCIONES DE SUPABASE
-// ============================================
-
 async function getAllBookings() {
     try {
         const negocioId = getNegocioId();
-        console.log('getAllBookings - negocioId:', negocioId);
         
         if (!negocioId) {
             console.error('❌ No hay negocioId disponible');
             return [];
         }
         
-        console.log('Obteniendo reservas para negocio:', negocioId);
-        
         const url = `${window.SUPABASE_URL}/rest/v1/reservas?negocio_id=eq.${negocioId}&select=*&order=fecha.desc,hora_inicio.asc`;
-        console.log('URL de consulta:', url);
         
         const res = await fetch(url, {
             headers: {
@@ -70,8 +52,6 @@ async function getAllBookings() {
             }
         });
         
-        console.log('📊 Status de respuesta:', res.status);
-        
         if (!res.ok) {
             const errorText = await res.text();
             console.error('❌ Error en respuesta:', errorText);
@@ -79,7 +59,6 @@ async function getAllBookings() {
         }
         
         const data = await res.json();
-        console.log('✅ Reservas obtenidas:', data.length);
         return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -114,7 +93,6 @@ async function deleteExpiredPendingBookings(configNegocio = {}) {
 
         const eliminadas = await res.json();
         if (Array.isArray(eliminadas) && eliminadas.length > 0) {
-            console.log(`Reservas pendientes vencidas eliminadas: ${eliminadas.length}`);
             for (const booking of eliminadas) {
                 await window.notificarListaEsperaTurnoLiberado?.(booking);
             }
@@ -134,8 +112,6 @@ async function cancelBooking(id, bookingData = null) {
             console.error('a No hay negocioId disponible');
             return false;
         }
-        
-        console.log(`🗑️ Cancelando reserva ${id} para negocio:`, negocioId);
         
         const res = await fetch(
             `${window.SUPABASE_URL}/rest/v1/reservas?negocio_id=eq.${negocioId}&id=eq.${id}`,
@@ -184,8 +160,6 @@ async function createBooking(bookingData) {
             negocio_id: negocioId
         };
         
-        console.log('Creando reserva para negocio:', negocioId, dataWithNegocio);
-        
         const res = await fetch(
             `${window.SUPABASE_URL}/rest/v1/reservas`,
             {
@@ -213,10 +187,6 @@ async function createBooking(bookingData) {
         return { success: false, error: error.message };
     }
 }
-
-// ============================================
-// FUNCION PARA MARCAR TURNOS COMO COMPLETADOS
-// ============================================
 async function marcarTurnosCompletados() {
     try {
         const negocioId = getNegocioId();
@@ -234,10 +204,6 @@ async function marcarTurnosCompletados() {
         const horaActual = ahora.getHours();
         const minutosActuales = ahora.getMinutes();
         const totalMinutosActual = horaActual * 60 + minutosActuales;
-        
-        console.log('🔎 Verificando turnos para marcar como completados...');
-        console.log('Fecha LOCAL actual:', hoy);
-        console.log('Hora LOCAL actual:', `${horaActual}:${minutosActuales}`);
         
         const responsePasados = await fetch(
             `${window.SUPABASE_URL}/rest/v1/reservas?negocio_id=eq.${negocioId}&estado=eq.Reservado&fecha=lt.${hoy}&select=id,fecha,hora_inicio,hora_fin,cliente_nombre,servicio,profesional_nombre`,
@@ -274,16 +240,11 @@ async function marcarTurnosCompletados() {
             return totalMinutosFin <= totalMinutosActual;
         });
         
-        console.log(`📊 Turnos de días pasados (fecha < ${hoy}): ${turnosPasados.length}`);
-        console.log(`📊 Turnos de hoy terminados: ${turnosHoyTerminados.length}`);
-        
         const turnosACompletar = [...turnosPasados, ...turnosHoyTerminados];
         
         if (turnosACompletar.length > 0) {
-            console.log(`${turnosACompletar.length} turnos a marcar como completados`);
             
             for (const turno of turnosACompletar) {
-                console.log(`Completando turno de ${turno.cliente_nombre} - ${turno.fecha} ${turno.hora_inicio} a ${turno.hora_fin}`);
                 
                 await fetch(
                     `${window.SUPABASE_URL}/rest/v1/reservas?negocio_id=eq.${negocioId}&id=eq.${turno.id}`,
@@ -298,20 +259,13 @@ async function marcarTurnosCompletados() {
                     }
                 );
             }
-            
-            console.log(`${turnosACompletar.length} turnos marcados como completados`);
         } else {
-            console.log('a No hay turnos para completar');
         }
         
     } catch (error) {
         console.error('Error marcando turnos completados:', error);
     }
 }
-
-// ============================================
-// FUNCIONES AUXILIARES
-// ============================================
 const timeToMinutes = (time) => {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
@@ -418,10 +372,6 @@ const minutesToHoraLegible = (minutosTotales) => {
     const minutos = minutosTotales % 60;
     return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
 };
-
-// ============================================
-// COMPONENTE PRINCIPAL
-// ============================================
 function AdminApp() {
     const profesionalInicial = window.getProfesionalAutenticado?.() || null;
     const [bookings, setBookings] = React.useState([]);
@@ -454,6 +404,7 @@ function AdminApp() {
     const [cargandoBloqueados, setCargandoBloqueados] = React.useState(false);
     const [nuevoBloqueo, setNuevoBloqueo] = React.useState({ nombre: '', whatsapp: '', codigo_pais: '53', motivo: '' });
     const [busquedaClienteManual, setBusquedaClienteManual] = React.useState('');
+    const [busquedaClientes, setBusquedaClientes] = React.useState('');
     const [clienteDetalle, setClienteDetalle] = React.useState(null);
 
     const [showNuevaReservaModal, setShowNuevaReservaModal] = React.useState(false);
@@ -619,6 +570,11 @@ function AdminApp() {
 
     const limpiarTelefonoCliente = normalizarTelefonoLocalSeguro;
 
+    const inferirCodigoPaisCliente = (telefono, fallback = codigoPaisClienteManual) => {
+        const detectado = window.detectarPaisTelefono ? window.detectarPaisTelefono(telefono) : null;
+        return detectado?.codigo || fallback || codigoPaisNegocio;
+    };
+
     const clientesManualFiltrados = React.useMemo(() => {
         const queryTexto = normalizarBusquedaCliente(busquedaClienteManual);
         const queryNumero = String(busquedaClienteManual || '').replace(/\D/g, '');
@@ -640,18 +596,17 @@ function AdminApp() {
     }, [busquedaClienteManual, clientesRegistrados, config?.codigo_pais]);
 
     const seleccionarClienteManual = (cliente) => {
-        setNuevaReservaData(prev => ({
-            ...prev,
-            cliente_nombre: cliente.nombre || '',
-            cliente_whatsapp: limpiarTelefonoCliente(cliente.whatsapp),
-            cliente_codigo_pais: window.normalizarTelefonoInternacional ? '' : prev.cliente_codigo_pais
-        }));
+        setNuevaReservaData(prev => {
+            const codigoCliente = inferirCodigoPaisCliente(cliente.whatsapp, prev.cliente_codigo_pais);
+            return {
+                ...prev,
+                cliente_nombre: cliente.nombre || '',
+                cliente_whatsapp: limpiarTelefonoCliente(cliente.whatsapp, codigoCliente),
+                cliente_codigo_pais: codigoCliente
+            };
+        });
         setBusquedaClienteManual('');
     };
-
-    // ============================================
-    // FUNCIÓN PARA CARGAR DÍAS CERRADOS DIRECTAMENTE DE SUPABASE
-    // ============================================
     const cargarDiasCerradosDirecto = async () => {
         try {
             const negocioId = getNegocioId();
@@ -678,10 +633,6 @@ function AdminApp() {
             return [];
         }
     };
-
-    // ============================================
-    // CARGAR CONFIGURACIÓN Y LOGO
-    // ============================================
     React.useEffect(() => {
         window.getNombreNegocio().then(nombre => {
             setNombreNegocio(nombre);
@@ -700,19 +651,13 @@ function AdminApp() {
             if (configData?.logo_url) {
                 setLogoNegocio(configData.logo_url);
             }
-            console.log('✅ Configuración recargada:', configData);
         } catch (error) {
             console.error('Error cargando config:', error);
         }
     };
-
-    // ============================================
-    // DETECTAR ROL DEL USUARIO
-    // ============================================
     React.useEffect(() => {
         const profesionalAuth = window.getProfesionalAutenticado?.();
         if (profesionalAuth) {
-            console.log('Usuario detectado como profesional:', profesionalAuth);
             setUserRole('profesional');
             setProfesional(profesionalAuth);
             setUserNivel(profesionalAuth.nivel || 1);
@@ -723,7 +668,6 @@ function AdminApp() {
                 profesional_id: profesionalAuth.id
             }));
         } else {
-            console.log('Usuario detectado como admin');
             setUserRole('admin');
             setUserNivel(3);
         }
@@ -957,10 +901,6 @@ function AdminApp() {
 
         cargarHorarios();
     }, [nuevaReservaData.profesional_id, nuevaReservaData.fecha, nuevaReservaData.servicio, nuevaReservaData.duracion_personalizada, nuevaReservaData.hora_inicio, nuevaReservaData.hora_fin, serviciosManualSeleccionados, serviciosList, reservaEditando]);
-
-    // ============================================
-    // FUNCIONES DE DISPONIBILIDAD
-    // ============================================
     
     const cargarDisponibilidadMes = async (fecha, profesionalId) => {
         if (!profesionalId) return;
@@ -1112,11 +1052,6 @@ function AdminApp() {
             const horariosPorDia = horarios.horariosPorDia || {};
             const descansosPorDia = horarios.descansosPorDia || {};
             
-            console.log('=========================================');
-            console.log(`📊 Profesional ID: ${profesionalId}`);
-            console.log(`📊 Horarios por día:`, horariosPorDia);
-            console.log('=========================================');
-            
             const profesionalObj = profesionalesList.find(p => p.id === profesionalId);
             const fechasLibresPersonales = profesionalObj?.fechas_libres || [];
             
@@ -1191,9 +1126,7 @@ function AdminApp() {
                 
                 const hoy = getCurrentLocalDate();
                 if (fechaStr === hoy) {
-                    console.log(`\n📅 Analizando HOY (${fechaStr}) - ${diaSemana}:`);
                     console.log(`   Horarios del día:`, horariosDelDia.map(i => indiceToHoraLegible(i)));
-                    console.log(`   Reservas del día: ${reservasDia.length}`);
                 }
                 
                 for (const horaIndice of horariosDelDia) {
@@ -1217,11 +1150,9 @@ function AdminApp() {
                     if (tieneConflicto) {
                         horariosOcupados++;
                         if (fechaStr === hoy) {
-                            console.log(`   ❌ Horario ${slotStr} está OCUPADO`);
                         }
                     } else {
                         if (fechaStr === hoy) {
-                            console.log(`   ✅ Horario ${slotStr} está LIBRE`);
                         }
                     }
                 }
@@ -1229,8 +1160,6 @@ function AdminApp() {
                 const tieneDisponibilidad = horariosDisponiblesDia > 0 && horariosOcupados < horariosDisponiblesDia;
                 
                 if (fechaStr === hoy) {
-                    console.log(`   📊 Total horarios del día: ${horariosDelDia.length}, Ocupados: ${horariosOcupados}`);
-                    console.log(`   🟢 Disponible: ${tieneDisponibilidad}\n`);
                 }
                 
                 disponibilidad[fechaStr] = tieneDisponibilidad;
@@ -1336,10 +1265,6 @@ function AdminApp() {
             setDisponibilidadCargando(false);
         }
     };
-
-    // ============================================
-    // FUNCIONES DEL CALENDARIO
-    // ============================================
     
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
@@ -1919,10 +1844,6 @@ function AdminApp() {
 
         return { ok: true };
     };
-
-    // ============================================
-    // CREAR RESERVA MANUAL
-    // ============================================
     const handleCrearReservaManual = async () => {
         if (!puedeGestionarReservas) {
             alert('Tu nivel de acceso solo permite ver reservas.');
@@ -1991,8 +1912,6 @@ function AdminApp() {
                 hora_fin: endTime,
                 estado: requiereAnticipo ? "Pendiente" : "Reservado"
             };
-
-            console.log('Creando reserva manual. Requiere anticipo:', requiereAnticipo);
             
             let result;
             if (reservaEditando) {
@@ -2104,6 +2023,16 @@ function AdminApp() {
                         if (window.enviarConfirmacionReserva) {
                             await window.enviarConfirmacionReserva(result.data, configNegocio);
                         }
+                        if (window.enviarNotificacionPush) {
+                            const cfg = configNegocio || {};
+                            const fecha = window.formatFechaCompleta ? window.formatFechaCompleta(result.data.fecha) : result.data.fecha;
+                            const hora = window.formatTo12Hour ? window.formatTo12Hour(result.data.hora_inicio) : result.data.hora_inicio;
+                            window.enviarNotificacionPush(
+                                `${cfg.nombre || 'Salon'} - Reserva manual`,
+                                `👤 ${result.data.cliente_nombre}\n💅 ${result.data.servicio}\n📅 ${fecha} ${hora}`,
+                                'calendar', 'default'
+                            ).catch(e => console.warn('ntfy:', e));
+                        }
                     }
                 } catch (whatsappError) {
                     console.error('Error enviando WhatsApp:', whatsappError);
@@ -2139,10 +2068,6 @@ function AdminApp() {
             setCreandoReservaManual(false);
         }
     };
-
-    // ============================================
-    // FUNCIONES DE CLIENTES
-    // ============================================
 
     const parseCsvLine = (linea, separador = ',') => {
         const valores = [];
@@ -2226,7 +2151,6 @@ function AdminApp() {
     };
     
     const loadClientesRegistrados = async () => {
-        console.log('Cargando clientes registrados...');
         setCargandoClientes(true);
         try {
             if (typeof window.getClientesRegistrados !== 'function') {
@@ -2236,7 +2160,6 @@ function AdminApp() {
             }
             
             const registrados = await window.getClientesRegistrados();
-            console.log('Registrados obtenidos:', registrados.length);
             
             if (Array.isArray(registrados)) {
                 setClientesRegistrados(registrados);
@@ -2313,7 +2236,6 @@ function AdminApp() {
             return;
         }
         if (!confirm('¿Seguro que querés eliminar este cliente? Perderá el acceso a la app.')) return;
-        console.log('🗑️ Eliminando cliente:', whatsapp);
         try {
             if (typeof window.eliminarCliente !== 'function') {
                 alert('Error: Función no disponible');
@@ -2329,27 +2251,18 @@ function AdminApp() {
             alert('Error al eliminar cliente');
         }
     };
-
-    // ============================================
-    // FUNCIONES DE RESERVAS
-    // ============================================
     const fetchBookings = async () => {
-        console.log('fetchBookings - INICIANDO CARGA');
         setLoading(true);
         try {
             let data;
             
             if (userRole === 'profesional' && profesional) {
-                console.log(`Cargando reservas de profesional ${profesional.id}...`);
                 data = await window.getReservasPorProfesional?.(profesional.id, false) || [];
             } else {
-                console.log('Llamando getAllBookings...');
                 const configActual = config || (window.cargarConfiguracionNegocio ? await window.cargarConfiguracionNegocio(true) : {});
                 await deleteExpiredPendingBookings(configActual);
                 data = await getAllBookings();
             }
-            
-            console.log('Datos recibidos en fetchBookings:', data?.length || 0);
             
             if (Array.isArray(data)) {
                 data = filtrarReservasDelProfesional(data);
@@ -2365,12 +2278,6 @@ function AdminApp() {
 
                 data = filtrarReservasDelProfesional(data);
                 
-                console.log('RESERVAS CARGADAS:', data.length);
-                console.log('Rango de fechas:', {
-                    primera: data.length > 0 ? data[data.length-1]?.fecha : 'sin datos',
-                    ultima: data.length > 0 ? data[0]?.fecha : 'sin datos'
-                });
-                
                 setBookings(Array.isArray(data) ? data : []);
             } else {
                 setBookings([]);
@@ -2385,7 +2292,6 @@ function AdminApp() {
 
     React.useEffect(() => {
         const intervalo = setInterval(() => {
-            console.log('🔎 Verificando turnos para completar...');
             
             marcarTurnosCompletados().then(() => {
                 fetchBookings();
@@ -2403,17 +2309,7 @@ function AdminApp() {
             loadClientesRegistrados();
             loadClientesBloqueados();
         }
-        
-        console.log('Verificando auth:', {
-            userRole,
-            userNivel,
-            profesional
-        });
     }, [userRole, userNivel, profesional]);
-
-    // ============================================
-    // FUNCIÓN PARA CONFIRMAR PAGO
-    // ============================================
     const confirmarPago = async (id, bookingData) => {
         if (!puedeGestionarReservas) {
             alert('Tu nivel de acceso solo permite ver reservas.');
@@ -2472,7 +2368,9 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
 
                 window.enviarWhatsApp(bookingData.cliente_whatsapp, mensajeCliente);
 
-                alert('Pago confirmado. Grupo de servicios reservado y cliente notificada.');
+                if (window.enviarNotificacionPush) window.enviarNotificacionPush(`${nombreNegocio} - Pago confirmado`, `✅ ${bookingData.cliente_nombre}\n💅 ${bookingData.servicio}\n📅 ${fechaConDia} ${horaFormateada}`, 'white_check_mark', 'default').catch(() => {});
+                if (window.enviarPushCliente) window.enviarPushCliente({ whatsapp: bookingData.cliente_whatsapp, title: `✅ Pago confirmado — ${nombreNegocio}`, body: `Tu cita de ${bookingData.servicio} el ${fechaConDia} a las ${horaFormateada} está confirmada.` }).catch(() => {});
+
                 fetchBookings();
                 return;
             } catch (error) {
@@ -2485,7 +2383,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
         if (!confirm(`Confirmar que se recibió el pago de ${bookingData.cliente_nombre}? El turno pasará a "Reservado".`)) return;
 
         try {
-            console.log(`Confirmando pago para reserva ${id}`);
 
             const response = await fetch(
                 `${window.SUPABASE_URL}/rest/v1/reservas?negocio_id=eq.${getNegocioId()}&id=eq.${id}`,
@@ -2503,8 +2400,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
             if (!response.ok) {
                 throw new Error('Error al confirmar pago');
             }
-
-            console.log('Enviando confirmacion de turno al cliente...');
 
             const configNegocio = await window.cargarConfiguracionNegocio();
             const fechaConDia = window.formatFechaCompleta ?
@@ -2535,7 +2430,9 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
 
             window.enviarWhatsApp(bookingData.cliente_whatsapp, mensajeCliente);
 
-            alert('Pago confirmado. Turno reservado y cliente notificado.');
+            if (window.enviarNotificacionPush) window.enviarNotificacionPush(`${nombreNegocio} - Pago confirmado`, `✅ ${bookingData.cliente_nombre}\n💅 ${bookingData.servicio}\n📅 ${fechaConDia} ${horaFormateada}`, 'white_check_mark', 'default').catch(() => {});
+            if (window.enviarPushCliente) window.enviarPushCliente({ whatsapp: bookingData.cliente_whatsapp, title: `✅ Pago confirmado — ${nombreNegocio}`, body: `Tu cita de ${bookingData.servicio} el ${fechaConDia} a las ${horaFormateada} está confirmada.` }).catch(() => {});
+
             fetchBookings();
 
         } catch (error) {
@@ -2543,7 +2440,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
             alert('Error al confirmar el pago');
         }
     };
-
 
     // FUNCIÓN PARA BORRAR TODAS LAS RESERVAS CANCELADAS
     // ============================================
@@ -2775,10 +2671,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
             alert('Error al marcar la ausencia.');
         }
     };
-
-    // ============================================
-    // HANDLE CANCEL
-    // ============================================
     const handleCancel = async (id, bookingData) => {
         if (!puedeGestionarReservas) {
             alert('Tu nivel de acceso solo permite ver reservas.');
@@ -2795,7 +2687,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
             }
 
             if (todoOk) {
-                console.log('📱 Enviando notificación de cancelación del grupo por admin...');
                 bookingData.cancelado_por = 'admin';
 
                 if (window.notificarCancelacion) {
@@ -2815,7 +2706,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
         
         const ok = await cancelBooking(id, bookingData);
         if (ok) {
-            console.log('📱 Enviando notificaciones de cancelación por admin...');
             
             bookingData.cancelado_por = 'admin';
             
@@ -2840,24 +2730,15 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
             localStorage.removeItem('userRole');
             localStorage.removeItem('clienteAuth');
             localStorage.removeItem('negocioId');
-            
-            console.log('Sesión cerrada, redirigiendo a index.html');
             window.location.href = 'index.html';
         }
     };
-
-    // ============================================
-    // FILTROS
-    // ============================================
     const getFilteredBookings = () => {
         const bookingsVisibles = filtrarReservasDelProfesional(bookings);
-        console.log('Aplicando filtros a', bookingsVisibles.length, 'reservas');
         
         let filtradas = filterDate
             ? bookingsVisibles.filter(b => b.fecha === filterDate)
             : [...bookingsVisibles];
-        
-        console.log('Despues filtro fecha:', filtradas.length);
         
         let resultado;
         if (statusFilter === 'activas') {
@@ -2873,8 +2754,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
         } else {
             resultado = filtradas;
         }
-        
-        console.log('Resultado final:', resultado.length);
         
         return resultado;
     };
@@ -3212,8 +3091,11 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
         const cobroReal = reservas.reduce((total, reserva) => total + Number(reserva.monto_cobrado || 0), 0);
         const requiereAnticipo = config?.requiere_anticipo === true || booking?.estado === 'Pendiente' || booking?.requiere_anticipo || booking?.requiereAnticipo || booking?.anticipo_recibido;
         const valorAnticipo = Number(config?.valor_anticipo ?? config?.monto_anticipo ?? 0);
+        const monedaNegocio = String(config?.whatsapp_moneda || 'CUP').toUpperCase();
         const anticipoCalculado = config?.tipo_anticipo === 'porcentaje'
-            ? Math.round(costoServicios * (valorAnticipo / 100))
+            ? (monedaNegocio === 'USD'
+                ? Math.round(costoServicios * (valorAnticipo / 100) * 100) / 100
+                : Math.round(costoServicios * (valorAnticipo / 100)))
             : valorAnticipo;
         const anticipo = requiereAnticipo ? anticipoCalculado : 0;
         const totalMostrar = cobroReal > 0 ? cobroReal : costoServicios;
@@ -3244,7 +3126,8 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
 
     const formatMoneyEstadistica = (value) => {
         const monto = Number(value || 0);
-        return `$${monto.toLocaleString('es-CU', { maximumFractionDigits: 0 })}`;
+        const decimales = monto % 1 === 0 ? 0 : 2;
+        return `$${monto.toLocaleString('es-CU', { minimumFractionDigits: decimales, maximumFractionDigits: decimales })}`;
     };
 
     const getDateFromInput = (value) => {
@@ -3602,7 +3485,6 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
         
         tabs.push({ id: 'agenda', icono: '📋', label: 'Agenda' });
 
-
         if (puedeVerEstadisticas) {
             tabs.push({ id: 'estadisticas', icono: 'Stats', label: 'Estadisticas' });
         }
@@ -3873,7 +3755,7 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                                 setNuevaReservaData({
                                                     ...nuevaReservaData,
                                                     cliente_codigo_pais: nuevoCodigo,
-                                                    cliente_whatsapp: normalizarTelefonoLocalSeguro(nuevaReservaData.cliente_whatsapp, nuevoCodigo)
+                                                    cliente_whatsapp: String(nuevaReservaData.cliente_whatsapp || '').replace(/\D/g, '')
                                                 });
                                             }}
                                             className="w-32 px-2 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-sm"
@@ -3882,7 +3764,7 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                                 <option key={pais.id} value={pais.codigo}>{pais.bandera} +{pais.codigo}</option>
                                             ))}
                                         </select>
-                                        <input type="tel" value={nuevaReservaData.cliente_whatsapp} onChange={(e) => setNuevaReservaData({...nuevaReservaData, cliente_whatsapp: normalizarTelefonoLocalSeguro(e.target.value, codigoPaisClienteManual)})} className="w-full px-4 py-2 rounded-r-lg border border-gray-300" placeholder={paisTelefono.ejemplo || '55002272'} />
+                                        <input type="tel" value={nuevaReservaData.cliente_whatsapp} onChange={(e) => setNuevaReservaData({...nuevaReservaData, cliente_whatsapp: String(e.target.value || '').replace(/\D/g, '')})} className="w-full px-4 py-2 rounded-r-lg border border-gray-300" placeholder={paisTelefono.ejemplo || '55002272'} />
                                     </div>
                                 </div>
                                 <div>
@@ -4401,6 +4283,21 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                         </div>
                         {showClientesRegistrados && (
                             <div className="space-y-5 max-h-[42rem] overflow-y-auto pr-1">
+                                {clientesRegistrados.length > 0 && (
+                                    <div className="flex items-center gap-2 border border-pink-200 rounded-xl bg-pink-50/50 px-3 py-2">
+                                        <span className="text-pink-400 text-sm">🔍</span>
+                                        <input
+                                            type="text"
+                                            value={busquedaClientes}
+                                            onChange={e => setBusquedaClientes(e.target.value)}
+                                            placeholder="Buscar por nombre o número..."
+                                            className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-pink-300"
+                                        />
+                                        {busquedaClientes && (
+                                            <button onClick={() => setBusquedaClientes('')} className="text-pink-400 hover:text-pink-600 text-xs">✕</button>
+                                        )}
+                                    </div>
+                                )}
                                 {(userRole === 'admin' || userNivel >= 3) && (
                                     <div className="rounded-xl border border-red-100 bg-red-50 p-4">
                                         <h3 className="font-bold text-red-700 mb-3">Lista negra</h3>
@@ -4412,7 +4309,7 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                                     onChange={(e) => setNuevoBloqueo({
                                                         ...nuevoBloqueo,
                                                         codigo_pais: e.target.value,
-                                                        whatsapp: normalizarTelefonoLocalSeguro(nuevoBloqueo.whatsapp, e.target.value)
+                                                        whatsapp: String(nuevoBloqueo.whatsapp || '').replace(/\D/g, '')
                                                     })}
                                                     className="w-28 rounded-l-lg border border-r-0 px-2 py-2 text-sm bg-white"
                                                 >
@@ -4420,7 +4317,7 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                                         <option key={pais.id} value={pais.codigo}>{pais.bandera} +{pais.codigo}</option>
                                                     ))}
                                                 </select>
-                                                <input type="tel" value={nuevoBloqueo.whatsapp} onChange={(e) => setNuevoBloqueo({...nuevoBloqueo, whatsapp: normalizarTelefonoLocalSeguro(e.target.value, nuevoBloqueo.codigo_pais || codigoPaisNegocio)})} className="border rounded-r-lg px-3 py-2 text-sm" placeholder="WhatsApp" />
+                                                <input type="tel" value={nuevoBloqueo.whatsapp} onChange={(e) => setNuevoBloqueo({...nuevoBloqueo, whatsapp: String(e.target.value || '').replace(/\D/g, '')})} className="border rounded-r-lg px-3 py-2 text-sm" placeholder="WhatsApp" />
                                             </div>
                                             <input type="text" value={nuevoBloqueo.motivo} onChange={(e) => setNuevoBloqueo({...nuevoBloqueo, motivo: e.target.value})} className="border rounded-lg px-3 py-2 text-sm" placeholder="Motivo opcional" />
                                             <button onClick={() => handleBloquearCliente()} className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700">Bloquear</button>
@@ -4441,7 +4338,15 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                     </div>
                                 )}
                                 {cargandoClientes ? <p className="text-center text-pink-500">Cargando clientes...</p> : clientesRegistrados.length === 0 ? <p className="text-center text-gray-500">No hay clientes registrados</p> :
-                                    clientesRegistrados.map((cliente, idx) => {
+                                    (() => {
+                                        const q = busquedaClientes.toLowerCase().trim();
+                                        const qNum = busquedaClientes.replace(/\D/g, '');
+                                        const filtrados = q ? clientesRegistrados.filter(c =>
+                                            (c.nombre || '').toLowerCase().includes(q) ||
+                                            (qNum && (c.whatsapp || '').includes(qNum))
+                                        ) : clientesRegistrados;
+                                        if (filtrados.length === 0) return <p className="text-center text-gray-400 text-sm py-4">No hay clientes que coincidan con "{busquedaClientes}"</p>;
+                                        return filtrados.map((cliente, idx) => {
                                         const score = getClienteScore(cliente);
                                         const reservasCliente = getReservasCliente(cliente);
                                         const ultimaCita = score.ultima
@@ -4520,7 +4425,8 @@ Cualquier cambio, podés cancelarlo desde la app con hasta 1 hora de anticipaci�
                                                 </div>
                                             </div>
                                         );
-                                    })}
+                                    });
+                                    })()}
                             </div>
                         )}
                     </div>
